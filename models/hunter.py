@@ -9,16 +9,24 @@ from utils.constants import (
 
 class Hunter:
     def __init__(self, name: str, skill: HunterSkill):
+        # Identity
         self.name = name
         self.skill = skill
+
+        # State
         self.stamina = 1.0  # 100%
         self.carrying = None  # Can carry one Treasure
-        self.hideout = None  # Link to assigned hideout
-        self.known_treasures = []  # Memory of seen treasures (optional AI)
-        self.known_hideouts = []
-        self.steps_since_collapse = 0
-        self.collapsing = False
         self.alive = True
+        self.collapsing = False
+        self.steps_since_collapse = 0
+
+        # Memory
+        self.known_treasures = []
+        self.known_hideouts = []
+        self.known_knight_locations = []  # NEW: Memory of knight patrols
+
+        # Links
+        self.hideout = None
 
     def move(self):
         """Simulate moving to another cell. Reduce stamina."""
@@ -58,12 +66,19 @@ class Hunter:
         if (x, y) not in self.known_hideouts:
             self.known_hideouts.append((x, y))
 
+    def remember_knight(self, x, y):
+        if (x, y) not in self.known_knight_locations:
+            self.known_knight_locations.append((x, y))
+
     def scan_and_remember(self, nearby_cells):
+        """Scan surrounding cells and remember what is seen."""
         for cell in nearby_cells:
             if cell.cell_type == CellType.TREASURE:
                 self.remember_treasure(cell.x, cell.y)
             elif cell.cell_type == CellType.HIDEOUT:
                 self.remember_hideout(cell.x, cell.y)
+            elif cell.cell_type == CellType.KNIGHT:
+                self.remember_knight(cell.x, cell.y)
 
     def can_collect(self, treasure):
         return self.carrying is None or treasure.value > self.carrying.value
