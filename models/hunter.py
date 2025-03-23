@@ -13,6 +13,10 @@ class Hunter:
         self.name = name
         self.skill = skill
 
+        # Position
+        self.x = 0
+        self.y = 0
+
         # State
         self.stamina = 1.0  # 100%
         self.carrying = None  # Can carry one Treasure
