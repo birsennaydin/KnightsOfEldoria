@@ -89,3 +89,24 @@ class SimulationController:
         """Run the simulation for the given number of steps."""
         for _ in range(steps):
             self.step()
+            self.print_grid()
+
+    def print_grid(self):
+        """Print the current state of the grid to the terminal."""
+        print(f"\n--- Grid at Step {self.step_count} ---")
+        for y in range(self.grid.size):
+            row = ""
+            for x in range(self.grid.size):
+                cell = self.grid.get_cell(x, y)
+                if cell.cell_type == CellType.HUNTER:
+                    row += " H "
+                elif cell.cell_type == CellType.KNIGHT:
+                    row += " K "
+                elif cell.cell_type == CellType.TREASURE:
+                    row += " T "
+                elif cell.cell_type == CellType.HIDEOUT:
+                    row += " D "
+                else:
+                    row += " . "
+            print(row)
+        print("-" * (self.grid.size * 3))
