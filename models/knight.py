@@ -63,6 +63,9 @@ class Knight:
             hunter.remember_treasure(*lost_treasure_location)
             hunter.carrying = None
 
+    def log(self, message):
+        print(f"[Knight:{self.name}] {message}")
+
     def __repr__(self):
         status = "Resting" if self.resting else "Active"
         return f"Knight({self.name}, {status}, Energy: {self.energy:.2f})"

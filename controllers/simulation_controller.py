@@ -8,6 +8,7 @@ from controllers.hunter_controller import HunterController
 from controllers.knight_controller import KnightController
 from utils.enums import TreasureType, HunterSkill, CellType
 from utils.constants import GRID_MIN_SIZE
+from utils.logger import log  # Loglama fonksiyonu
 
 
 class SimulationController:
@@ -18,6 +19,7 @@ class SimulationController:
         self.hideouts = []
         self.treasures = []
         self.step_count = 0
+        self.treasures_delivered = 0  # Optional: track delivered treasures
 
         # Initialize controllers
         self.hunter_controller = HunterController(self.grid)
@@ -53,6 +55,16 @@ class SimulationController:
         """Perform a single simulation step."""
         self.step_count += 1
 
+        # Decay all treasures
+        for x in range(self.grid.size):
+            for y in range(self.grid.size):
+                cell = self.grid.get_cell(x, y)
+                if cell.cell_type == CellType.TREASURE and cell.content:
+                    cell.content.decay()
+                    if cell.content.is_depleted():
+                        log(f"[Treasure] {cell.content.type.name.title()} at ({x}, {y}) depleted and removed.")
+                        cell.clear()
+
         # Process all hunters
         for hunter in self.hunters:
             self.hunter_controller.process(hunter)
@@ -83,11 +95,20 @@ class SimulationController:
                         break
 
                 if not placed:
-                    print("No space to place recruited hunter.")
+                    log("⚠️ No space to place recruited hunter.")
+
+        # Step summary log
+        alive_hunters = len([h for h in self.hunters if h.alive])
+        active_knights = len([k for k in self.knights if not k.resting])
+        treasures_on_grid = self.count_remaining_treasures()
+
+        log(f"[Step {self.step_count}] Hunters alive: {alive_hunters} | Knights active: {active_knights} | Treasures remaining: {treasures_on_grid}")
 
     def run(self, steps=100):
-        """Run the simulation for the given number of steps."""
         for _ in range(steps):
+            if self.count_remaining_treasures() == 0 or not any(h.alive for h in self.hunters):
+                log("🛑 Simulation ended: No more treasures or hunters left.")
+                break
             self.step()
             self.print_grid()
 
@@ -110,3 +131,13 @@ class SimulationController:
                     row += " . "
             print(row)
         print("-" * (self.grid.size * 3))
+
+    def count_remaining_treasures(self):
+        """Count number of treasures currently on the grid."""
+        count = 0
+        for x in range(self.grid.size):
+            for y in range(self.grid.size):
+                cell = self.grid.get_cell(x, y)
+                if cell.cell_type == CellType.TREASURE:
+                    count += 1
+        return count

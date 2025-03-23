@@ -5,6 +5,7 @@ from utils.constants import (
     HUNTER_REST_GAIN,
     HUNTER_COLLAPSE_STEPS
 )
+from nlp.sentiment_analyzer import analyze_sentiment
 
 
 class Hunter:
@@ -86,6 +87,27 @@ class Hunter:
 
     def can_collect(self, treasure):
         return self.carrying is None or treasure.value > self.carrying.value
+
+    def wants_to_return(self):
+        """Hunter wants to return if carrying treasure."""
+        return self.carrying is not None
+
+    def is_at_hideout(self):
+        """Check if hunter is in their assigned hideout."""
+        return self.hideout and (self.x, self.y) == (self.hideout.x, self.hideout.y)
+
+    def deliver_treasure(self):
+        """Deliver treasure to the hideout."""
+        if self.carrying and self.is_at_hideout():
+            self.hideout.receive_treasure(self)
+
+    def log(self, message):
+        print(f"[Hunter:{self.name}] {message}")
+
+    def express_opinion(self, text):
+        score = analyze_sentiment(text)
+        mood = "🙂 Positive" if score > 0 else "😐 Neutral" if score == 0 else "🙁 Negative"
+        print(f"[{self.name} says] \"{text}\" → Sentiment: {mood} ({score:.2f})")
 
     def __repr__(self):
         skill = self.skill.name.title()
