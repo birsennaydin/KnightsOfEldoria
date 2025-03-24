@@ -5,16 +5,16 @@ from utils.enums import HunterSkill, TreasureType
 def main():
     print("⚔️ Knights of Eldoria Simulation Started ⚔️")
 
-    controller = SimulationController(grid_size=10)
+    controller = SimulationController()
 
     # Add a hideout
     controller.add_hideout(0, 0)
 
     # Add a hunter
-    controller.add_hunter("Ela", HunterSkill.NAVIGATION, 1, 1)
+    controller.add_hunter("Birsen", HunterSkill.NAVIGATION, 1, 1)
 
     # Add a knight
-    controller.add_knight("Yavuz", 5, 5)
+    controller.add_knight("Melisa", 5, 5)
 
     # Add some treasures
     controller.add_treasure(2, 2, TreasureType.GOLD)
@@ -22,12 +22,12 @@ def main():
     controller.add_treasure(4, 4, TreasureType.BRONZE)
 
     # Run simulation
-    controller.run(steps=50)
+    controller.run(steps=100)
 
-    # NLP demo: make Ela express some thoughts
+    # NLP demo: make Birsen express some thoughts
     print("\n🗣️ Sentiment Analysis Demo:")
     for hunter in controller.hunters:
-        if hunter.name == "Ela":
+        if hunter.name == "Birsen":
             hunter.express_opinion("I love finding treasure and helping my team.")
             hunter.express_opinion("I'm exhausted and scared of the knights.")
             hunter.express_opinion("Today is just okay.")

@@ -8,7 +8,7 @@ from controllers.hunter_controller import HunterController
 from controllers.knight_controller import KnightController
 from utils.enums import TreasureType, HunterSkill, CellType
 from utils.constants import GRID_MIN_SIZE
-from utils.logger import log  # Loglama fonksiyonu
+from utils.logger import log
 
 
 class SimulationController:
@@ -19,7 +19,7 @@ class SimulationController:
         self.hideouts = []
         self.treasures = []
         self.step_count = 0
-        self.treasures_delivered = 0  # Optional: track delivered treasures
+        self.treasures_delivered = 0  # Track delivered treasures
 
         # Initialize controllers
         self.hunter_controller = HunterController(self.grid)
