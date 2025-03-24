@@ -1,34 +1,30 @@
-name: Run Tests
+name: Run Python Tests
 
 on:
   push:
-    branches:
-      - main  # Run tests on pushes to the main branch
+    branches: [ main ]
   pull_request:
-    branches:
-      - main  # Run tests for pull requests targeting the main branch
+    branches: [ main ]
 
 jobs:
   test:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the code
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      # Step 2: Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'  # Use the desired Python version (e.g., 3.9 or 3.8)
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
 
-      # Step 3: Install dependencies from requirements.txt
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt  # Install all dependencies 
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt || true  # fallback if no file
+        pip install pytest textblob scikit-learn
 
-      # Step 4: Run tests
-      - name: Run tests
-        run: pytest --maxfail=1 --disable-warnings -q
+    - name: Run tests
+      run: |
+        pytest tests/
