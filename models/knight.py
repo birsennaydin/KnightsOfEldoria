@@ -1,8 +1,10 @@
 from utils.constants import (
     KNIGHT_ENERGY_LOSS_PER_CHASE,
-    KNIGHT_REST_GAIN,
-    KNIGHT_REST_THRESHOLD
+    KNIGHT_REST_THRESHOLD,
+    KNIGHT_REST_GAIN
 )
+from utils.logger import log
+from textblob import TextBlob
 
 
 class Knight:
@@ -12,60 +14,39 @@ class Knight:
         self.y = y
         self.energy = 1.0  # 100%
         self.resting = False
-        self.target = None  # Hunter object (if any)
+        self.target = None  # Currently pursued Hunter
 
     def detect_hunters(self, nearby_cells):
-        """Return a list of hunters detected in nearby cells."""
-        hunters = []
-        for cell in nearby_cells:
-            if cell.cell_type.name == "HUNTER":
-                hunters.append(cell.content)
-        return hunters
+        return [cell.content for cell in nearby_cells if cell.cell_type.name == "HUNTER" and cell.content and cell.content.alive]
 
     def choose_target(self, hunters):
-        """Choose one hunter to pursue (basic strategy: first one)."""
         if hunters:
             self.target = hunters[0]
-            return self.target
-        return None
 
     def chase(self):
-        """Chase the target, losing energy per pursuit."""
-        if self.energy > KNIGHT_REST_THRESHOLD and self.target:
+        if self.target and self.energy >= KNIGHT_ENERGY_LOSS_PER_CHASE:
+            dx = self.target.x - self.x
+            dy = self.target.y - self.y
+            self.x += (1 if dx > 0 else -1 if dx < 0 else 0)
+            self.y += (1 if dy > 0 else -1 if dy < 0 else 0)
             self.energy -= KNIGHT_ENERGY_LOSS_PER_CHASE
-            if self.energy <= 0:
-                self.energy = 0
-                self.resting = True
+
+    def should_rest(self):
+        return self.energy <= KNIGHT_REST_THRESHOLD
 
     def rest(self):
-        """Recover energy while resting."""
         self.energy = min(1.0, self.energy + KNIGHT_REST_GAIN)
         if self.energy > KNIGHT_REST_THRESHOLD:
             self.resting = False
 
-    def should_rest(self):
-        """Determine if knight should go into resting mode."""
-        return self.energy <= KNIGHT_REST_THRESHOLD
-
     def interact_with_hunter(self, hunter, method="detain"):
-        """Detain or challenge a hunter, forcing them to drop their treasure."""
-        if not hunter.alive:
-            return
-
         if method == "detain":
-            hunter.stamina = max(0.0, hunter.stamina - 0.05)
-        elif method == "challenge":
-            hunter.stamina = max(0.0, hunter.stamina - 0.20)
-
-        # Drop treasure and remember the location
-        if hunter.carrying:
-            lost_treasure_location = (hunter.x, hunter.y)
-            hunter.remember_treasure(*lost_treasure_location)
-            hunter.carrying = None
+            hunter.alive = False
 
     def log(self, message):
-        print(f"[Knight:{self.name}] {message}")
+        log(f"[Knight - {self.name} @ ({self.x}, {self.y})]: {message}")
 
-    def __repr__(self):
-        status = "Resting" if self.resting else "Active"
-        return f"Knight({self.name}, {status}, Energy: {self.energy:.2f})"
+    def express_opinion(self, message):
+        sentiment = TextBlob(message).sentiment.polarity
+        mood = "positive 😊" if sentiment > 0.2 else "negative 😠" if sentiment < -0.2 else "neutral 😐"
+        log(f"[Knight - {self.name}]: '{message}' → Sentiment: {mood}")
