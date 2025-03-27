@@ -25,35 +25,33 @@ class HunterController:
             hunter.rest()
             return
 
-        # === 🧠 Return to hideout using A* Pathfinding ===
-        if hunter.wants_to_return() and hunter.hideout:
+        # === Critical stamina check ===
+        if hunter.stamina <= 0.06 and hunter.hideout:
+            hunter.log("is exhausted and trying to return to a hideout to rest.")
             start = (hunter.x, hunter.y)
             goal = (hunter.hideout.x, hunter.hideout.y)
             path = astar(self.grid, start, goal)
 
             if path:
-                next_pos = path[0]  # Take the next step on the path
+                next_pos = path[0]
                 dx = next_pos[0] - hunter.x
                 dy = next_pos[1] - hunter.y
-                hunter.log(f"using A* path to ({goal[0]}, {goal[1]}) → next: {next_pos}")
+                hunter.log(f"critical stamina → heading to hideout using A* → next step: {next_pos}")
             else:
-                # If no path is found, move randomly
                 dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
-                hunter.log("no path found – moving randomly")
+                hunter.log("no path to hideout found – moving randomly")
+
+        # If carrying treasure, move toward hideout
+        elif hunter.wants_to_return() and hunter.hideout:
+            dx = hunter.hideout.x - hunter.x
+            dy = hunter.hideout.y - hunter.y
+            move_x = 1 if dx > 0 else -1 if dx < 0 else 0
+            move_y = 1 if dy > 0 else -1 if dy < 0 else 0
+            dx, dy = random.choice([(move_x, 0), (0, move_y)])
+
         else:
-            # Random exploration when not returning to hideout
-            target = self.select_best_treasure(hunter, self.grid)
-            if target:
-                path = astar(self.grid, (hunter.x, hunter.y), target)
-                if path:
-                    next_pos = path[0]
-                    dx = next_pos[0] - hunter.x
-                    dy = next_pos[1] - hunter.y
-                    hunter.log(f"moving toward best treasure at {target} with utility path")
-                else:
-                    dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
-            else:
-                dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
+            # Random exploration
+            dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
 
         # Move the hunter
         new_x, new_y = self.grid.wrap(hunter.x + dx, hunter.y + dy)
@@ -66,17 +64,17 @@ class HunterController:
             hunter.x, hunter.y = new_x, new_y
             hunter.move()
 
-            # Scan surroundings and remember discovered cells
+            # Scan surroundings and remember
             nearby = self.grid.get_cells_in_radius(hunter.x, hunter.y, 1)
             hunter.scan_and_remember(nearby)
 
-            # Check if the current cell contains treasure
+            # Check if current cell has treasure
             if new_cell.cell_type == CellType.TREASURE and new_cell.content:
                 hunter.collect_treasure(new_cell.content)
                 hunter.log(
                     f"collected treasure: {new_cell.content.treasure_type.name} (value={new_cell.content.value})"
                 )
-                new_cell.clear()  # Remove the treasure from the map
+                new_cell.clear()  # Remove treasure from map
 
     def select_best_treasure(self, hunter, grid):
         best_score = float("-inf")

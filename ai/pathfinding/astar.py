@@ -33,10 +33,13 @@ def astar(grid, start, goal):
             return path
 
         for neighbor in grid.get_neighbors(*current):
-            if neighbor.cell_type.name == "KNIGHT":
+            x, y = neighbor
+            cell = grid.get_cell(x, y)
+            if cell.cell_type.name == "KNIGHT":
                 continue
 
-            neighbor_pos = (neighbor.x, neighbor.y)
+            x, y = neighbor
+            neighbor_pos = (x, y)
             tentative_g = g_score[current] + 1
 
             if neighbor_pos not in g_score or tentative_g < g_score[neighbor_pos]:
