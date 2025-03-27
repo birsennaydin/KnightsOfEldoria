@@ -63,6 +63,11 @@ class SimulationController:
             self.grid.place_hideout(hideout)
             self.hideouts.append(hideout)
 
+        # The remaining cells will be empty
+        for _ in range(num_empty):
+            x, y = all_positions.pop()
+            self.grid.get_cell(x, y).clear()  # Ensures the cell is empty
+
     def run(self, steps=100):
         for step in range(steps):
             if self.gui.is_closed():
