@@ -1,4 +1,5 @@
 from utils.enums import CellType
+from ai.pathfinding.astar import astar
 import random
 
 
@@ -24,15 +25,23 @@ class HunterController:
             hunter.rest()
             return
 
-        # If carrying treasure, move toward hideout
+        # === 🧠 Return to hideout using A* Pathfinding ===
         if hunter.wants_to_return() and hunter.hideout:
-            dx = hunter.hideout.x - hunter.x
-            dy = hunter.hideout.y - hunter.y
-            move_x = 1 if dx > 0 else -1 if dx < 0 else 0
-            move_y = 1 if dy > 0 else -1 if dy < 0 else 0
-            dx, dy = random.choice([(move_x, 0), (0, move_y)])
+            start = (hunter.x, hunter.y)
+            goal = (hunter.hideout.x, hunter.hideout.y)
+            path = astar(self.grid, start, goal)
+
+            if path:
+                next_pos = path[0]  # Take the next step on the path
+                dx = next_pos[0] - hunter.x
+                dy = next_pos[1] - hunter.y
+                hunter.log(f"using A* path to ({goal[0]}, {goal[1]}) → next: {next_pos}")
+            else:
+                # If no path is found, move randomly
+                dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
+                hunter.log("no path found – moving randomly")
         else:
-            # Random exploration
+            # Random exploration when not returning to hideout
             dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
 
         # Move the hunter
@@ -46,14 +55,14 @@ class HunterController:
             hunter.x, hunter.y = new_x, new_y
             hunter.move()
 
-            # Scan surroundings and remember
+            # Scan surroundings and remember discovered cells
             nearby = self.grid.get_cells_in_radius(hunter.x, hunter.y, 1)
             hunter.scan_and_remember(nearby)
 
-            # Check if current cell has treasure
+            # Check if the current cell contains treasure
             if new_cell.cell_type == CellType.TREASURE and new_cell.content:
                 hunter.collect_treasure(new_cell.content)
                 hunter.log(
                     f"collected treasure: {new_cell.content.treasure_type.name} (value={new_cell.content.value})"
                 )
-                new_cell.clear()  # Remove treasure from map
+                new_cell.clear()  # Remove the treasure from the map
