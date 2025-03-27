@@ -1,37 +1,43 @@
-from utils.enums import CellType
-
-
 class KnightController:
     def __init__(self, grid):
-        self.grid = grid  # Grid is needed for accessing nearby cells
+        self.grid = grid
 
     def process(self, knight):
-        # If resting, try to recover stamina
+        # === Decision Tree begins ===
+
         if knight.resting:
             knight.rest()
             if not knight.resting:
-                knight.log("recovered and is now active.")
+                knight.log("has recovered and is active again.")
             return
 
-        # Detect nearby hunters
+        if knight.should_rest():
+            knight.resting = True
+            knight.log("is too tired and starts resting.")
+            return
+
         nearby_cells = self.grid.get_cells_in_radius(knight.x, knight.y, 3)
         visible_hunters = knight.detect_hunters(nearby_cells)
 
         if visible_hunters:
-            knight.log(f"detected {len(visible_hunters)} hunters nearby.")
+            knight.log(f"spotted {len(visible_hunters)} hunters nearby.")
             knight.choose_target(visible_hunters)
-            if knight.target:
-                knight.log(f"targeting hunter: {knight.target.name}")
-                knight.chase()
-                knight.log(f"chasing hunter: {knight.target.name}")
 
+            if knight.target:
+                if knight.energy > 0.6:
+                    knight.log("is energized and charges the target.")
+                    knight.chase()
+                elif 0.3 < knight.energy <= 0.6:
+                    knight.log("is cautious but still chasing.")
+                    knight.chase()
+                else:
+                    knight.log("is too weak to engage in pursuit.")
+                    knight.resting = True
+                    return
+
+                # Interaction if caught
                 if (knight.target.x, knight.target.y) == (knight.x, knight.y):
                     knight.interact_with_hunter(knight.target, method="detain")
                     knight.log(f"detained hunter: {knight.target.name}")
         else:
-            knight.log("no hunters detected nearby.")
-
-        # If stamina is low, begin resting
-        if knight.should_rest():
-            knight.resting = True
-            knight.log("is now resting.")
+            knight.log("patrolling area, no hunters in sight.")

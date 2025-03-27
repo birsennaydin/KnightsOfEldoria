@@ -42,7 +42,18 @@ class HunterController:
                 hunter.log("no path found – moving randomly")
         else:
             # Random exploration when not returning to hideout
-            dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
+            target = self.select_best_treasure(hunter, self.grid)
+            if target:
+                path = astar(self.grid, (hunter.x, hunter.y), target)
+                if path:
+                    next_pos = path[0]
+                    dx = next_pos[0] - hunter.x
+                    dy = next_pos[1] - hunter.y
+                    hunter.log(f"moving toward best treasure at {target} with utility path")
+                else:
+                    dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
+            else:
+                dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
 
         # Move the hunter
         new_x, new_y = self.grid.wrap(hunter.x + dx, hunter.y + dy)
@@ -66,3 +77,33 @@ class HunterController:
                     f"collected treasure: {new_cell.content.treasure_type.name} (value={new_cell.content.value})"
                 )
                 new_cell.clear()  # Remove the treasure from the map
+
+    def select_best_treasure(self, hunter, grid):
+        best_score = float("-inf")
+        best_target = None
+
+        for (tx, ty) in hunter.known_treasures:
+            treasure_cell = grid.get_cell(tx, ty)
+
+            # Skip if it's not really a treasure
+            if not treasure_cell.content or treasure_cell.cell_type.name != "TREASURE":
+                continue
+
+            value = treasure_cell.content.value
+            distance = abs(tx - hunter.x) + abs(ty - hunter.y)
+            stamina = hunter.stamina
+
+            value_score = value * 10
+            distance_score = distance * 2
+            stamina_penalty = (1 - stamina) * 5
+
+            utility = value_score - distance_score - stamina_penalty
+
+            if utility > best_score:
+                best_score = utility
+                best_target = (tx, ty)
+
+        return best_target
+
+
+
