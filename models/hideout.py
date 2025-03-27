@@ -1,69 +1,60 @@
 import random
 
 from models.hunter import Hunter
-from utils.constants import HIDEOUT_CAPACITY, RECRUIT_PROBABILITY
+from utils.constants import RECRUIT_PROBABILITY
 
 
 class Hideout:
-    def __init__(self, x: int, y: int):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.capacity = 5
         self.hunters = []
-        self.stored_treasures = []
+        self.treasures = []
 
-    def enter(self, hunter):
-        """Add hunter to the hideout if there's space."""
-        if len(self.hunters) < HIDEOUT_CAPACITY:
+    def store_treasure(self, treasure):
+        self.treasures.append(treasure)
+
+    def add_hunter(self, hunter):
+        if len(self.hunters) < self.capacity:
             self.hunters.append(hunter)
             hunter.hideout = self
-            self.receive_treasure(hunter)
-            return True
-        return False
 
-    def receive_treasure(self, hunter):
-        """Store treasure carried by hunter."""
-        if hunter.carrying:
-            self.stored_treasures.append(hunter.carrying)
-            hunter.carrying = None
-
-    def rest_all(self):
-        """Restore stamina of all hunters resting here."""
-        for hunter in self.hunters:
-            if hunter.alive and not hunter.collapsing:
-                hunter.rest()
+    def remove_hunter(self, hunter):
+        if hunter in self.hunters:
+            self.hunters.remove(hunter)
+            hunter.hideout = None
 
     def share_knowledge(self):
-        """Hunters in the hideout share known treasures, hideouts, and knight patrols."""
+        """
+        Share all known treasures and hideouts among hunters in this hideout.
+        """
         all_treasures = set()
         all_hideouts = set()
-        all_knights = set()
 
-        for hunter in self.hunters:
-            all_treasures.update(hunter.known_treasures)
-            all_hideouts.update(hunter.known_hideouts)
-            if hasattr(hunter, "known_knight_locations"):
-                all_knights.update(hunter.known_knight_locations)
+        for h in self.hunters:
+            all_treasures.update(h.known_treasures)
+            all_hideouts.update(h.known_hideouts)
 
-        for hunter in self.hunters:
-            for loc in all_treasures:
-                if loc not in hunter.known_treasures:
-                    hunter.known_treasures.append(loc)
-            for loc in all_hideouts:
-                if loc not in hunter.known_hideouts:
-                    hunter.known_hideouts.append(loc)
-            if hasattr(hunter, "known_knight_locations"):
-                for loc in all_knights:
-                    if loc not in hunter.known_knight_locations:
-                        hunter.known_knight_locations.append(loc)
+        for h in self.hunters:
+            h.known_treasures = list(set(h.known_treasures) | all_treasures)
+            h.known_hideouts = list(set(h.known_hideouts) | all_hideouts)
 
-    def attempt_recruit(self):
-        """Recruit a new hunter if skill diversity and space conditions are met."""
-        if len(self.hunters) >= 2 and len(self.hunters) < HIDEOUT_CAPACITY:
-            skills = {hunter.skill for hunter in self.hunters}
-            if len(skills) >= 2 and random.random() < RECRUIT_PROBABILITY:
-                new_skill = random.choice(list(skills))
-                return Hunter(name="Recruited", skill=new_skill)  # should be handled in controller
-        return None
+    def try_recruit(self):
+        """
+        Attempt to recruit a new hunter with 20% probability
+        if hideout is not full and has a variety of skills.
+        """
+        if len(self.hunters) >= self.capacity:
+            return
 
-    def __repr__(self):
-        return f"Hideout({self.x}, {self.y}) with {len(self.hunters)} hunters and {len(self.stored_treasures)} treasures"
+        if random.random() <= RECRUIT_PROBABILITY:
+            existing_skills = list({h.skill for h in self.hunters})
+            if not existing_skills:
+                return
+
+            new_skill = random.choice(existing_skills)
+            new_name = f"Recruit-{self.x}-{self.y}-{random.randint(100, 999)}"
+            new_hunter = Hunter(new_name, new_skill, self.x, self.y)
+            self.add_hunter(new_hunter)
+            new_hunter.log(f"has been recruited with skill: {new_skill.name}")

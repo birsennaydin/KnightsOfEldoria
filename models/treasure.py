@@ -1,25 +1,21 @@
-from utils.enums import TreasureType
-from utils.constants import TREASURE_DECAY_PERCENT, TREASURE_MIN_VALUE
-from utils.logger import log  # Logları hem terminale hem dosyaya yazmak için
-
-
 class Treasure:
-    def __init__(self, treasure_type: TreasureType):
-        self.type = treasure_type
-        self.value = float(treasure_type.value)  # starting value: 3 / 7 / 13
+    def __init__(self, treasure_type, x, y):
+        self.treasure_type = treasure_type
+        self.x = x
+        self.y = y
+        self.value = self._get_initial_value()
+
+    def _get_initial_value(self):
+        if self.treasure_type.name == "BRONZE":
+            return 3.0
+        elif self.treasure_type.name == "SILVER":
+            return 7.0
+        elif self.treasure_type.name == "GOLD":
+            return 13.0
+        return 1.0
 
     def decay(self):
-        """Decrease the value of the treasure slightly each simulation step."""
-        old_value = self.value
-        self.value = max(TREASURE_MIN_VALUE, self.value - TREASURE_DECAY_PERCENT)
+        self.value = max(0.0, self.value - 0.1)
 
-        # Log the decay
-        if self.value < old_value:
-            log(f"[Treasure] {self.type.name.title()} decayed from {old_value:.2f} to {self.value:.2f}")
-
-    def is_depleted(self) -> bool:
-        """Check if treasure has lost all its value."""
-        return self.value <= TREASURE_MIN_VALUE
-
-    def __repr__(self):
-        return f"{self.type.name.title()} Treasure ({self.value:.2f}%)"
+    def is_depleted(self):
+        return self.value <= 0

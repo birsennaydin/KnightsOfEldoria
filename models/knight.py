@@ -1,10 +1,4 @@
-from utils.constants import (
-    KNIGHT_ENERGY_LOSS_PER_CHASE,
-    KNIGHT_REST_THRESHOLD,
-    KNIGHT_REST_GAIN
-)
-from utils.logger import log
-from textblob import TextBlob
+from utils.enums import CellType
 
 
 class Knight:
@@ -12,41 +6,94 @@ class Knight:
         self.name = name
         self.x = x
         self.y = y
-        self.energy = 1.0  # 100%
+        self.energy = 1.0
         self.resting = False
-        self.target = None  # Currently pursued Hunter
+        self.target = None
+        self.memory = []
+        self.alive = True
 
-    def detect_hunters(self, nearby_cells):
-        return [cell.content for cell in nearby_cells if cell.cell_type.name == "HUNTER" and cell.content and cell.content.alive]
+    def log(self, message: str):
+        from utils.logger import log
+        log(f"[Knight] {self.name}: {message}")
 
-    def choose_target(self, hunters):
-        if hunters:
-            self.target = hunters[0]
+    def move(self):
+        if not self.alive:  # If the knight is dead, do not allow movement
+            self.log(f"{self.name} cannot move because they are dead.")
+            return
 
-    def chase(self):
-        if self.target and self.energy >= KNIGHT_ENERGY_LOSS_PER_CHASE:
-            dx = self.target.x - self.x
-            dy = self.target.y - self.y
-            self.x += (1 if dx > 0 else -1 if dx < 0 else 0)
-            self.y += (1 if dy > 0 else -1 if dy < 0 else 0)
-            self.energy -= KNIGHT_ENERGY_LOSS_PER_CHASE
+        self.energy -= 0.02
+        if self.energy < 0:
+            self.energy = 0
+            self.die()  # If energy reaches 0, the knight dies
 
-    def should_rest(self):
-        return self.energy <= KNIGHT_REST_THRESHOLD
+    def is_exhausted(self):
+        return self.energy <= 0.2
 
     def rest(self):
-        self.energy = min(1.0, self.energy + KNIGHT_REST_GAIN)
-        if self.energy > KNIGHT_REST_THRESHOLD:
-            self.resting = False
+        self.energy += 0.1
+        if self.energy > 1.0:
+            self.energy = 1.0
 
-    def interact_with_hunter(self, hunter, method="detain"):
+    def remember(self, location):
+        self.memory.append(location)
+
+    def detect_hunters(self, nearby_cells):
+        """Return a list of hunters within nearby cells (used for knight detection)."""
+        hunters = []
+        for cell in nearby_cells:
+            if cell and cell.cell_type == CellType.HUNTER:
+                hunters.append(cell.content)
+        return hunters
+
+    def should_rest(self) -> bool:
+        """
+        Determine if the knight should rest based on energy level.
+        Returns True if energy is 20% or below.
+        """
+        if not self.alive:  # If the knight is dead, they cannot decide to rest
+            return False
+        return self.energy <= 0.2
+
+    def die(self):
+        """Mark the knight as dead."""
+        self.alive = False
+        self.log(f"{self.name} has fallen. They are no longer alive.")
+
+    def choose_target(self, hunters):
+        """
+        Choose the closest hunter as the target.
+        This is a simple heuristic; you can modify this based on other factors.
+        """
+        if not hunters:
+            return None
+
+        # Choose the hunter closest to the knight (using Manhattan distance)
+        target = min(hunters, key=lambda hunter: abs(hunter.x - self.x) + abs(hunter.y - self.y))
+        self.target = target
+
+    def move_to(self, x, y):
+        """
+        Move the knight to the specified coordinates and update their position.
+        """
+        self.x = x
+        self.y = y
+        self.log(f"{self.name} moved to ({self.x}, {self.y})")
+
+    def interact_with_hunter(self, hunter, method: str):
+        """
+        Interacts with a hunter, either detaining or challenging them.
+        :param hunter: The hunter the knight is interacting with.
+        :param method: The action method (either 'detain' or 'challenge').
+        """
         if method == "detain":
-            hunter.alive = False
-
-    def log(self, message):
-        log(f"[Knight - {self.name} @ ({self.x}, {self.y})]: {message}")
-
-    def express_opinion(self, message):
-        sentiment = TextBlob(message).sentiment.polarity
-        mood = "positive 😊" if sentiment > 0.2 else "negative 😠" if sentiment < -0.2 else "neutral 😐"
-        log(f"[Knight - {self.name}]: '{message}' → Sentiment: {mood}")
+            # If detaining, reduce hunter's stamina and force them to drop their treasure
+            hunter.stamina -= 0.05  # Decrease hunter's stamina by 5%
+            hunter.drop_treasure()  # Assuming a drop_treasure method exists in the Hunter class
+            self.log(f"Detained {hunter.name}, reduced stamina and forced to drop treasure.")
+        elif method == "challenge":
+            # If challenging, reduce hunter's stamina more severely and force them to drop their treasure
+            hunter.stamina -= 0.20  # Decrease hunter's stamina by 20%
+            hunter.drop_treasure()  # Assuming a drop_treasure method exists in the Hunter class
+            self.log(f"Challenged {hunter.name}, reduced stamina significantly and forced to drop treasure.")
+        else:
+            self.log(f"Unknown interaction method: {method}")
