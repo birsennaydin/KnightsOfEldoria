@@ -11,6 +11,7 @@ class Hideout:
         self.capacity = 5
         self.hunters = []
         self.treasures = []
+        self.knight_patrols = []  # Track recent knight patrols
 
     def store_treasure(self, treasure):
         self.treasures.append(treasure)
@@ -39,6 +40,8 @@ class Hideout:
         for h in self.hunters:
             h.known_treasures = list(set(h.known_treasures) | all_treasures)
             h.known_hideouts = list(set(h.known_hideouts) | all_hideouts)
+            # Share knight patrol information as well
+            h.known_knight_patrols = self.knight_patrols
 
     def try_recruit(self):
         """
