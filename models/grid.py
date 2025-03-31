@@ -51,7 +51,7 @@ class Grid:
     def get_neighbors(self, x: int, y: int) -> list[tuple[int, int]]:
         """
         Return valid neighbors for a given (x, y) position.
-        Only includes cells that are empty or contain treasure.
+        Only includes cells that are empty, treasure, hideout or not blocked by knight.
         """
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         neighbors = []
@@ -60,7 +60,8 @@ class Grid:
             nx, ny = self.wrap(x + dx, y + dy)
             cell = self.get_cell(nx, ny)
 
-            if cell.is_empty() or cell.cell_type == CellType.TREASURE or cell.cell_type == CellType.HIDEOUT:
+            # Check if the cell is empty, contains treasure, or is a hideout and not a knight
+            if (cell.is_empty() or cell.cell_type == CellType.TREASURE or cell.cell_type == CellType.HIDEOUT) and cell.cell_type != CellType.KNIGHT:
                 neighbors.append((nx, ny))
 
         return neighbors

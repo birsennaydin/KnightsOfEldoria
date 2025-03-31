@@ -1,5 +1,7 @@
 import heapq
 
+from utils.enums import CellType
+
 
 def heuristic(a, b):
     """Manhattan mesafesi hesaplayıcı (dik hareket için uygun)"""
@@ -35,17 +37,15 @@ def astar(grid, start, goal):
         for neighbor in grid.get_neighbors(*current):
             x, y = neighbor
             cell = grid.get_cell(x, y)
-            if cell.cell_type.name == "KNIGHT":
-                continue
 
-            x, y = neighbor
-            neighbor_pos = (x, y)
+            # Check if the cell is blocked by a knight
+            print("BIRSENNNN===00012212", cell.cell_type)
+
             tentative_g = g_score[current] + 1
-
-            if neighbor_pos not in g_score or tentative_g < g_score[neighbor_pos]:
-                came_from[neighbor_pos] = current
-                g_score[neighbor_pos] = tentative_g
-                f_score[neighbor_pos] = tentative_g + heuristic(neighbor_pos, goal)
-                heapq.heappush(open_set, (f_score[neighbor_pos], neighbor_pos))
+            if neighbor not in g_score or tentative_g < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g
+                f_score[neighbor] = tentative_g + heuristic(neighbor, goal)
+                heapq.heappush(open_set, (f_score[neighbor], neighbor))
 
     return []
