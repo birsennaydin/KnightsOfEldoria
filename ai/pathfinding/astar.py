@@ -35,11 +35,6 @@ def astar(grid, start, goal):
             return path
 
         for neighbor in grid.get_neighbors(*current):
-            x, y = neighbor
-            cell = grid.get_cell(x, y)
-
-            # Check if the cell is blocked by a knight
-            print("BIRSENNNN===00012212", cell.cell_type)
 
             tentative_g = g_score[current] + 1
             if neighbor not in g_score or tentative_g < g_score[neighbor]:

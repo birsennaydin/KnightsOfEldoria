@@ -1,6 +1,7 @@
 from utils.enums import CellType
 
 
+# Knight class with interaction methods and movement
 class Knight:
     def __init__(self, name: str, x: int, y: int):
         self.name = name

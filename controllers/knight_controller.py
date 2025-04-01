@@ -60,3 +60,5 @@ class KnightController:
         dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])  # Random movement choices
         new_x, new_y = self.grid.wrap(knight.x + dx, knight.y + dy)  # Ensure knight stays within grid bounds
         knight.move_to(new_x, new_y)  # Move the knight to the new position
+        knight.energy -= 0.2  # Patrolling consumes some energy
+        knight.log(f"{knight.name} is patrolling to ({new_x}, {new_y})")

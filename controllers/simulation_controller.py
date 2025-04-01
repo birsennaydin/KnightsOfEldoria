@@ -78,6 +78,7 @@ class SimulationController:
 
             for knight in self.knights:
                 self.knight_controller.process(knight)
+            self.gui.render()
 
             for treasure in list(self.treasures):
                 treasure.decay()
