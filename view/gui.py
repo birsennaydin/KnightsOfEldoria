@@ -18,7 +18,8 @@ class Gui(tk.Tk):
             CellType.HUNTER: "blue",
             CellType.TREASURE: "gold",
             CellType.KNIGHT: "red",
-            CellType.HIDEOUT: "green"
+            CellType.HIDEOUT: "green",
+            CellType.GARRISON: "purple"  # Garrison için renk ekledik
         }
 
         self.grid_frame = tk.Frame(self)

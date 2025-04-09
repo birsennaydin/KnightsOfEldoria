@@ -12,6 +12,7 @@ class Knight:
         self.target = None
         self.memory = []
         self.alive = True
+        self.garrison = None
 
     def log(self, message: str):
         from utils.logger import log
@@ -35,9 +36,10 @@ class Knight:
         return self.energy <= 0.2
 
     def rest(self):
+        """Garrison'da dinlenme."""
         self.energy += 0.1
         if self.energy > 1.0:
-            self.energy = 1.0
+            self.energy = 1.0  # Enerji 100% geçmemeli
 
     def remember(self, location):
         self.memory.append(location)
