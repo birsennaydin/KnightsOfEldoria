@@ -6,6 +6,7 @@ class CellType(Enum):
     HUNTER = 2
     KNIGHT = 3
     HIDEOUT = 4
+    GARRISON = 5
 
 class TreasureType(Enum):
     BRONZE = 3     # +3% wealth

@@ -22,6 +22,10 @@ class Knight:
             self.log(f"{self.name} cannot move because they are dead.")
             return
 
+        if self.energy <= 0:
+            self.die()
+            return
+
         self.energy -= 0.02
         if self.energy < 0:
             self.energy = 0

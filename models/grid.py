@@ -48,6 +48,11 @@ class Grid:
         if cell:
             cell.set_content(hideout, cell_type=CellType.HIDEOUT)
 
+    def place_garrison(self, garrison):
+        cell = self.get_cell(garrison.x, garrison.y)
+        if cell:
+            cell.set_content(None, CellType.GARRISON)
+
     def get_neighbors(self, x: int, y: int) -> list[tuple[int, int]]:
         """
         Return valid neighbors for a given (x, y) position.

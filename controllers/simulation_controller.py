@@ -19,11 +19,18 @@ class SimulationController:
         self.hideouts = []
         self.treasures = []
 
-        self.hunter_controller = HunterController(self.grid)
+        self.hunter_controller = HunterController(self.grid, self)
         self.knight_controller = KnightController(self.grid)
 
         self._populate_random_grid()
         self.gui = Gui(self.grid)
+
+    def remove_treasure_from_list(self, treasure):
+        """Remove the treasure from the Simulation."""
+        print(f"✅ TREASURE REMOVED000: {treasure}")
+        if treasure in self.treasures:
+            self.treasures.remove(treasure)
+            print(f"✅ TREASURE REMOVED001: {treasure}")
 
     def _populate_random_grid(self):
         size = self.grid.size
@@ -33,16 +40,20 @@ class SimulationController:
 
         num_empty = int(total_cells * 0.5)
         num_treasure = int(total_cells * 0.2)
-        num_knight = int(total_cells * 0.15)
+        num_knight = int(total_cells * 0.1)
         num_hunter = int(total_cells * 0.1)
         num_hideout = int(total_cells * 0.05)
 
         for _ in range(num_treasure):
             x, y = all_positions.pop()
             t_type = random.choice(list(TreasureType))
+            print(f"✅ SIMULATIONTR: {t_type}")
             treasure = Treasure(t_type, x, y)
+            print(f"✅ SIMULATIONTR00:  {treasure}")
+
             self.grid.place_treasure(treasure)
             self.treasures.append(treasure)
+            print("✅ SIMULATIONTR111: ", self.treasures)
 
         for _ in range(num_knight):
             x, y = all_positions.pop()
@@ -78,22 +89,22 @@ class SimulationController:
 
             for knight in self.knights:
                 self.knight_controller.process(knight)
-            self.gui.render()
 
             for treasure in list(self.treasures):
                 treasure.decay()
                 if treasure.is_depleted():
                     self.grid.clear_cell(treasure.x, treasure.y)
                     self.treasures.remove(treasure)
+                    print("✅ TREASURE REMOVE: ", self.treasures, treasure)
 
             for hideout in self.hideouts:
                 hideout.share_knowledge()
                 hideout.try_recruit()
 
             # === Termination Condition ===
-            active_hunters = any(h.alive for h in self.hunters)
-            if not self.treasures or not active_hunters:
-                print("✅ Simulation stopped: No treasure or no active hunters left.")
+            all_hunters_dead = all(not h.alive for h in self.hunters)
+            if not self.treasures or all_hunters_dead:
+                print("✅ Simulation stopped: No treasure or all hunters are dead.")
                 break
 
             self.gui.render()
