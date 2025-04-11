@@ -31,7 +31,12 @@ class Hunter:
         return self.carrying is not None
 
     def deliver_treasure(self):
-        self.carrying = None
+        if self.carrying:
+            self.hideout.stored_treasures.append(self.carrying)
+            self.log(
+                f"delivered treasure: {self.carrying.treasure_type.name} → Hideout @ ({self.hideout.x}, {self.hideout.y})"
+            )
+            self.carrying = None
 
     def collect_treasure(self, treasure):
         self.carrying = treasure

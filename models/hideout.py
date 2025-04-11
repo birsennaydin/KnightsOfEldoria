@@ -12,6 +12,7 @@ class Hideout:
         self.hunters = []
         self.treasures = []
         self.knight_patrols = []  # Track recent knight patrols
+        self.stored_treasures = [] # Store treasures
 
     def store_treasure(self, treasure):
         self.treasures.append(treasure)
@@ -48,16 +49,17 @@ class Hideout:
         Attempt to recruit a new hunter with 20% probability
         if hideout is not full and has a variety of skills.
         """
+        # Do not proceed if hideout is already full
         if len(self.hunters) >= self.capacity:
             return
 
-        if random.random() <= RECRUIT_PROBABILITY:
-            existing_skills = list({h.skill for h in self.hunters})
-            if not existing_skills:
-                return
+        existing_skills = list({h.skill for h in self.hunters})
+        if len(existing_skills) < 2:
+            return  # Not diverse enough
 
+        if random.random() <= RECRUIT_PROBABILITY:
             new_skill = random.choice(existing_skills)
             new_name = f"Recruit-{self.x}-{self.y}-{random.randint(100, 999)}"
             new_hunter = Hunter(new_name, new_skill, self.x, self.y)
-            self.add_hunter(new_hunter)
+            self.add_hunter(new_hunter) # Create new hunter with diverse existing skill
             new_hunter.log(f"has been recruited with skill: {new_skill.name}")

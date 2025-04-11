@@ -114,6 +114,7 @@ class SimulationController:
                     self.treasures.remove(treasure)
                     print("✅ TREASURE REMOVE: ", self.treasures, treasure)
 
+            # for just hunters which in the hideout
             for hideout in self.hideouts:
                 hideout.share_knowledge()
                 hideout.try_recruit()

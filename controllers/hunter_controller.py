@@ -24,6 +24,11 @@ class HunterController:
             hunter.rest()
             return
 
+        # Explicit collapse check if stamina is 0 and not yet collapsing
+        if hunter.stamina == 0 and not hunter.collapsing:
+            hunter.collapsing = True
+            hunter.log("has reached 0 stamina and is collapsing.")
+
         # Check the hunter is alive or not?
         if hunter.collapsing:
             hunter.collapse_check()
