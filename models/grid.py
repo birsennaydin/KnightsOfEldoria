@@ -43,6 +43,11 @@ class Grid:
         if cell:
             cell.set_content(knight, cell_type=CellType.KNIGHT)
 
+    def remove_knight(self, x, y):
+        cell = self.get_cell(x, y)
+        if cell:
+            cell.clear()
+
     def place_hideout(self, hideout):
         cell = self.get_cell(hideout.x, hideout.y)
         if cell:
@@ -51,7 +56,7 @@ class Grid:
     def place_garrison(self, garrison):
         cell = self.get_cell(garrison.x, garrison.y)
         if cell:
-            cell.set_content(None, CellType.GARRISON)
+            cell.set_content(garrison, cell_type=CellType.GARRISON)
 
     def get_neighbors(self, x: int, y: int) -> list[tuple[int, int]]:
         """

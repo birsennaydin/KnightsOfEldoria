@@ -12,22 +12,29 @@ class KnightController:
             knight.log(f"{knight.name} is dead and cannot take actions.")
             return
 
-        # Rule 1: Resting if too tired
-        if knight.resting:
-            knight.rest()
-            if not knight.resting:
-                knight.log("has recovered and is active again.")
-            return
-
-        # Rule 2: Knight should rest when energy is low
+        #Rule 1: If knight is too tired, check if it should rest.
         if knight.should_rest():
             knight.resting = True
-            knight.log("is too tired and starts resting.")
+            knight.log(f"{knight.name} is too tired and starts resting.")
+            # Send knight to garrison to rest if it has a garrison
+            if knight.garrison:
+                knight.garrison.add_knight(knight)  # Add knight to garrison for resting
             return
+
+        # Rule 2: Knight is already resting if this flag is set
+        if knight.resting:
+            knight.log(f"{knight.name} is resting. RULE2")
+            knight.rest()
+            if not knight.resting:
+                knight.log(f"{knight.name} has recovered and is active again.")
+            return
+
 
         # Rule 3: Scan for hunters in the knight's radius
         nearby_cells = self.grid.get_cells_in_radius(knight.x, knight.y, 3)
+        knight.log(f"GET NEARBY CELLS {nearby_cells}")
         visible_hunters = knight.detect_hunters(nearby_cells)
+        knight.log(f"VISIBLE HUNTERS {len(visible_hunters)} {visible_hunters}")
 
         if visible_hunters:
             knight.log(f"spotted {len(visible_hunters)} hunters nearby.")
@@ -40,6 +47,13 @@ class KnightController:
                 if path:
                     next_x, next_y = path[0]
                     knight.move_to(next_x, next_y)
+
+                    knight.log(
+                        f"KNIGHT 000 current position: ({knight.x}, {knight.y}), "
+                        f"KNIGHT 000 energy: {knight.energy}, "
+                        f"KNIGHT 000 resting: {knight.resting}"
+                    )
+
                     knight.energy -= 0.2  # Energy decreases with movement
                     knight.log(f"moving toward target at ({knight.target.x}, {knight.target.y})")
                 else:

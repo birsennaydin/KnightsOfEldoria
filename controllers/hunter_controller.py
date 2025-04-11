@@ -9,13 +9,10 @@ class HunterController:
         self.simulation_controller = simulation_controller  # Reference to SimulationController
 
     def process(self, hunter):
+        # If hunter not alive
         if not hunter.alive:
+            self.simulation_controller.remove_hunter_from_list(hunter)
             hunter.log(f"is dead at ({hunter.x}, {hunter.y})")
-            return
-
-        # Check the hunter is alive or not?
-        if hunter.collapsing:
-            hunter.collapse_check()
             return
 
         # If in hideout, rest and possibly deliver treasure
@@ -25,6 +22,11 @@ class HunterController:
                 hunter.deliver_treasure()
                 hunter.log("delivered treasure to hideout.")
             hunter.rest()
+            return
+
+        # Check the hunter is alive or not?
+        if hunter.collapsing:
+            hunter.collapse_check()
             return
 
         # === Critical stamina check ===

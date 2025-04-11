@@ -1,3 +1,5 @@
+import random
+
 from models.knight import Knight
 from utils.constants import RECRUIT_PROBABILITY
 
@@ -9,15 +11,23 @@ class Garrison:
         self.knights = []  # Garrison'da bulunan knight'lar
         self.knight_patrols = []  # Knightların yakın zamanda yaptığı devriye
 
+
     def add_knight(self, knight):
-        if len(self.knights) < self.capacity:
-            self.knights.append(knight)
-            knight.garrison = self  # Knight, garrison'a atandı
+        """Add knight to the garrison for resting."""
+        # Eğer knight dinlenmeye ihtiyacı varsa, garrison'a ekleyin
+        self.knights.append(knight)
+        knight.resting = True
+        knight.garrison = self  # Garrison'ı knight'a atıyoruz
+        knight.rest()  # Knight dinlenmeye başlar
+        print(f"{knight.name} is resting at the garrison. Function: add_knight")
 
     def remove_knight(self, knight):
+        """Remove knight from the garrison when fully rested."""
         if knight in self.knights:
             self.knights.remove(knight)
-            knight.garrison = None  # Knight, garrison'dan çıkarıldı
+            knight.resting = False
+            knight.garrison = None
+            print(f"{knight.name} has left the garrison.")
 
     def share_knowledge(self):
         """
@@ -31,6 +41,13 @@ class Garrison:
             knight.memory = list(set(knight.memory) | all_knight_patrols)
             # Diğer knight'lar için paylaşılan bilgi
             knight.known_knight_patrols = self.knight_patrols
+
+    def try_recruit(self):
+            new_name = f"Recruit-{self.x}-{self.y}-{random.randint(100, 999)}"
+            new_knight = Knight(new_name, self.x, self.y)
+            self.add_knight(new_knight)
+            new_knight.log(f"has been recruited with skill: {new_knight.name}")
+
 
     def rest_knights(self):
         """

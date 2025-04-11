@@ -1,12 +1,16 @@
+import random
+
+from ai.pathfinding.astar import astar
 from utils.enums import CellType
 
 
 # Knight class with interaction methods and movement
 class Knight:
-    def __init__(self, name: str, x: int, y: int):
+    def __init__(self, name: str, x: int, y: int, grid):
         self.name = name
         self.x = x
         self.y = y
+        self.grid = grid
         self.energy = 1.0
         self.resting = False
         self.target = None
@@ -17,6 +21,17 @@ class Knight:
     def log(self, message: str):
         from utils.logger import log
         log(f"[Knight] {self.name}: {message}")
+
+    def rest_at_garrison(self):
+        """
+        Garrison içinde dinlenme fonksiyonu:
+        Eğer knight enerjisi %20'nin altına düşerse, en yakın garrison'a gider ve dinlenir.
+        """
+        if self.is_exhausted() and self.garrison:  # Eğer knight yorgunsa ve bir garrison'a sahipse
+            self.resting = True
+            self.garrison.add_knight(self)  # Knight'ı garrison'a ekle
+            self.rest()  # Dinlenme işlemini başlat
+            print(f"{self.name} is resting at the garrison.")
 
     def move(self):
         if not self.alive:  # If the knight is dead, do not allow movement
@@ -37,9 +52,17 @@ class Knight:
 
     def rest(self):
         """Garrison'da dinlenme."""
+        print(f"{self} - KNIGHT REST.")
         self.energy += 0.1
         if self.energy > 1.0:
             self.energy = 1.0  # Enerji 100% geçmemeli
+            self.resting = False
+            print(f"{self} - KNIGHT ENERGY IS READY.")
+            # Dinlenme tamamlandığında knight'ı garrison'dan çıkarıyoruz
+            if self.garrison:
+                print(f"{self.name} THERE IS GARRISON. {self.garrison}")
+                self.garrison.remove_knight(self)
+            print(f"{self.name} REMOVE FROM GARRISON. {self.garrison}")
 
     def remember(self, location):
         self.memory.append(location)
@@ -48,7 +71,10 @@ class Knight:
         """Return a list of hunters within nearby cells (used for knight detection)."""
         hunters = []
         for cell in nearby_cells:
-            if cell and cell.cell_type == CellType.HUNTER:
+            if cell:
+                self.log(f"Scanning cell ({cell.x}, {cell.y}) → {cell.cell_type.name} | content: {cell.content}")
+            if cell and cell.cell_type == CellType.HUNTER and cell.content:
+                self.log(f"⚔️ FOUND HUNTER at ({cell.x}, {cell.y})")
                 hunters.append(cell.content)
         return hunters
 
@@ -74,16 +100,37 @@ class Knight:
         if not hunters:
             return None
 
-        # Choose the hunter closest to the knight (using Manhattan distance)
-        target = min(hunters, key=lambda hunter: abs(hunter.x - self.x) + abs(hunter.y - self.y))
-        self.target = target
+        best_target = None
+        best_cost = float('inf')
+
+        for h in hunters:
+            path = astar(self.grid, (self.x, self.y), (h.x, h.y))
+            if path and len(path) < best_cost:
+                best_target = h
+                best_cost = len(path)
+
+        self.target = best_target
+        if best_target:
+            self.log(
+                f"Target selected: {best_target.name} at ({best_target.x}, {best_target.y}) with path length {best_cost}")
+        else:
+            self.log("No reachable target found with A*")
 
     def move_to(self, x, y):
         """
         Move the knight to the specified coordinates and update their position.
         """
+        old_cell = self.grid.get_cell(self.x, self.y)
+        if old_cell:
+            old_cell.clear()
+
         self.x = x
         self.y = y
+
+        new_cell = self.grid.get_cell(x, y)
+        if new_cell:
+            new_cell.set_content(self, CellType.KNIGHT)
+
         self.log(f"{self.name} moved to ({self.x}, {self.y})")
 
     def interact_with_hunter(self, hunter, method: str):

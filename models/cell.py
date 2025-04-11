@@ -17,8 +17,9 @@ class Cell:
 
     def clear(self):
         """Remove content from the cell."""
-        self.content = None
-        self.cell_type = CellType.EMPTY
+        if self.cell_type not in {CellType.HIDEOUT, CellType.GARRISON}:
+            self.content = None
+            self.cell_type = CellType.EMPTY
 
     def __repr__(self):
         return f"Cell({self.x}, {self.y}): {self.cell_type.name}"

@@ -1,5 +1,7 @@
 import random
 import time
+
+from models.garrison import Garrison
 from models.grid import Grid
 from models.hunter import Hunter
 from models.knight import Knight
@@ -18,6 +20,7 @@ class SimulationController:
         self.knights = []
         self.hideouts = []
         self.treasures = []
+        self.garrisons = []
 
         self.hunter_controller = HunterController(self.grid, self)
         self.knight_controller = KnightController(self.grid)
@@ -32,6 +35,12 @@ class SimulationController:
             self.treasures.remove(treasure)
             print(f"✅ TREASURE REMOVED001: {treasure}")
 
+    def remove_hunter_from_list(self, hunter):
+        if hunter in self.hunters:
+            self.hunters.remove(hunter)
+            cell = self.grid.get_cell(hunter.x, hunter.y)
+            cell.clear()
+
     def _populate_random_grid(self):
         size = self.grid.size
         total_cells = size * size
@@ -40,9 +49,17 @@ class SimulationController:
 
         num_empty = int(total_cells * 0.5)
         num_treasure = int(total_cells * 0.2)
-        num_knight = int(total_cells * 0.1)
+        num_knight = int(total_cells * 0.12)
         num_hunter = int(total_cells * 0.1)
         num_hideout = int(total_cells * 0.05)
+        num_garrison = int(total_cells * 0.03)
+
+        # Add Garrisons to grid
+        for _ in range(num_garrison):  # Place Garrisons
+            x, y = all_positions.pop()
+            garrison = Garrison(x, y)  # Garrison class
+            self.grid.place_garrison(garrison)
+            self.garrisons.append(garrison)
 
         for _ in range(num_treasure):
             x, y = all_positions.pop()
@@ -57,7 +74,7 @@ class SimulationController:
 
         for _ in range(num_knight):
             x, y = all_positions.pop()
-            knight = Knight(f"Knight-{x}-{y}", x, y)
+            knight = Knight(f"Knight-{x}-{y}", x, y, self.grid)
             self.grid.place_knight(knight)
             self.knights.append(knight)
 
@@ -100,6 +117,8 @@ class SimulationController:
             for hideout in self.hideouts:
                 hideout.share_knowledge()
                 hideout.try_recruit()
+
+
 
             # === Termination Condition ===
             all_hunters_dead = all(not h.alive for h in self.hunters)
