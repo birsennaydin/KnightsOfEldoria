@@ -7,26 +7,24 @@ class KnightController:
         self.grid = grid
 
     def process(self, knight):
-        # Rule 0: If knight is dead, skip the process
-        if not knight.alive:
-            knight.log(f"{knight.name} is dead and cannot take actions.")
+
+        # Rule 1: Knight is already resting if this flag is set
+        if knight.resting:
+            knight.log(f"{knight.name} is resting. RULE1")
+            knight.rest()
+            if not knight.resting:
+                knight.log(f"{knight.name} has recovered and is active again.")
             return
 
-        #Rule 1: If knight is too tired, check if it should rest.
+        #Rule 2: If knight is too tired, check if it should rest.
         if knight.should_rest():
             knight.resting = True
             knight.log(f"{knight.name} is too tired and starts resting.")
             # Send knight to garrison to rest if it has a garrison
             if knight.garrison:
                 knight.garrison.add_knight(knight)  # Add knight to garrison for resting
-            return
-
-        # Rule 2: Knight is already resting if this flag is set
-        if knight.resting:
-            knight.log(f"{knight.name} is resting. RULE2")
-            knight.rest()
-            if not knight.resting:
-                knight.log(f"{knight.name} has recovered and is active again.")
+            else:
+                knight.rest() # there is not garrison, starting to rest in the same cell
             return
 
 
@@ -43,7 +41,7 @@ class KnightController:
             # Rule 4: If knight has a target, move towards them
             if knight.target:
                 # Use A* pathfinding to determine the path to the target
-                path = astar(self.grid, (knight.x, knight.y), (knight.target.x, knight.target.y))
+                path = astar(self.grid, (knight.x, knight.y), (knight.target.x, knight.target.y), role="knight")
                 if path:
                     next_x, next_y = path[0]
                     knight.move_to(next_x, next_y)
@@ -58,6 +56,7 @@ class KnightController:
                     knight.log(f"moving toward target at ({knight.target.x}, {knight.target.y})")
                 else:
                     knight.log("cannot reach target – switching to patrol.")
+                    knight.target = None
                     self.random_patrol(knight)  # If path is blocked, patrol randomly
 
                 # Rule 5: If knight reaches target, interact with hunter (detain or challenge)

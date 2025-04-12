@@ -75,3 +75,24 @@ class Grid:
                 neighbors.append((nx, ny))
 
         return neighbors
+
+    def get_knight_neighbors(self, x: int, y: int) -> list[tuple[int, int]]:
+        """
+        Returns valid neighboring cells for a Knight.
+
+        Knights are allowed to move into cells that are:
+        - EMPTY (free space),
+        - TREASURE (to potentially recover or pass over),
+        - HUNTER (to detain or challenge them).
+        """
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Possible movement directions (up, down, left, right)
+        neighbors = []
+
+        for dx, dy in directions:
+            nx, ny = self.wrap(x + dx, y + dy)  # Ensure coordinates wrap around the grid
+            cell = self.get_cell(nx, ny)
+
+            if cell and cell.cell_type in {CellType.EMPTY, CellType.TREASURE, CellType.HUNTER}:
+                neighbors.append((nx, ny))
+
+        return neighbors

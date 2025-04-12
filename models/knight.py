@@ -34,18 +34,18 @@ class Knight:
             print(f"{self.name} is resting at the garrison.")
 
     def move(self):
-        if not self.alive:  # If the knight is dead, do not allow movement
-            self.log(f"{self.name} cannot move because they are dead.")
-            return
 
-        if self.energy <= 0:
-            self.die()
+        # If energy is low do not allow movement
+        if self.is_exhausted():
+            self.log(f"{self.name} cannot move because they should rest.")
             return
 
         self.energy -= 0.02
-        if self.energy < 0:
-            self.energy = 0
-            self.die()  # If energy reaches 0, the knight dies
+        if self.is_exhausted():
+            if self.energy <= 0:
+                self.energy = 0
+            self.resting = True
+            return
 
     def is_exhausted(self):
         return self.energy <= 0.2
@@ -54,7 +54,7 @@ class Knight:
         """Garrison'da dinlenme."""
         print(f"{self} - KNIGHT REST.")
         self.energy += 0.1
-        if self.energy > 1.0:
+        if self.energy >= 1.0:
             self.energy = 1.0  # Enerji 100% geçmemeli
             self.resting = False
             print(f"{self} - KNIGHT ENERGY IS READY.")
@@ -83,14 +83,7 @@ class Knight:
         Determine if the knight should rest based on energy level.
         Returns True if energy is 20% or below.
         """
-        if not self.alive:  # If the knight is dead, they cannot decide to rest
-            return False
         return self.energy <= 0.2
-
-    def die(self):
-        """Mark the knight as dead."""
-        self.alive = False
-        self.log(f"{self.name} has fallen. They are no longer alive.")
 
     def choose_target(self, hunters):
         """
@@ -104,7 +97,7 @@ class Knight:
         best_cost = float('inf')
 
         for h in hunters:
-            path = astar(self.grid, (self.x, self.y), (h.x, h.y))
+            path = astar(self.grid, (self.x, self.y), (h.x, h.y), role="knight")
             if path and len(path) < best_cost:
                 best_target = h
                 best_cost = len(path)

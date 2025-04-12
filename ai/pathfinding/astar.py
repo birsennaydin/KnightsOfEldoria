@@ -8,7 +8,7 @@ def heuristic(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-def astar(grid, start, goal):
+def astar(grid, start, goal, role="default"):
     """
     A* algoritması ile grid üzerinde start → goal arası en kısa yolu bulur.
     :param grid: Grid nesnesi
@@ -34,7 +34,12 @@ def astar(grid, start, goal):
             path.reverse()
             return path
 
-        for neighbor in grid.get_neighbors(*current):
+        if role == "knight":
+            neighbors = grid.get_knight_neighbors(*current)
+        else:
+            neighbors = grid.get_neighbors(*current)
+
+        for neighbor in neighbors:
 
             tentative_g = g_score[current] + 1
             if neighbor not in g_score or tentative_g < g_score[neighbor]:
