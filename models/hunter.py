@@ -42,7 +42,6 @@ class Hunter:
         self.carrying = treasure
 
     def scan_and_remember(self, nearby_cells):
-        self.log(f"NEARBY CELL. {nearby_cells}")
         for cell in nearby_cells:
             self.log(f"SCAN AND REMEMBER. {cell}")
             if cell.cell_type.name == "TREASURE" and cell.content:

@@ -9,13 +9,13 @@ class HunterController:
         self.simulation_controller = simulation_controller  # Reference to SimulationController
 
     def process(self, hunter):
-        # If hunter not alive
+        # If hunter is not alive, remove them from the simulation
         if not hunter.alive:
             self.simulation_controller.remove_hunter_from_list(hunter)
             hunter.log(f"is dead at ({hunter.x}, {hunter.y})")
             return
 
-        # If in hideout, rest and possibly deliver treasure
+        # If hunter is inside a hideout
         if hunter.is_at_hideout():
             if hunter.carrying:
                 hunter.log(f"reached hideout at ({hunter.x}, {hunter.y})")
@@ -24,35 +24,63 @@ class HunterController:
             hunter.rest()
             return
 
-        # Explicit collapse check if stamina is 0 and not yet collapsing
+        # If stamina is exactly 0, set collapsing state if not already collapsing
         if hunter.stamina == 0 and not hunter.collapsing:
             hunter.collapsing = True
             hunter.log("has reached 0 stamina and is collapsing.")
 
-        # Check the hunter is alive or not?
+        # If hunter is collapsing, perform collapse check
         if hunter.collapsing:
             hunter.collapse_check()
             return
 
-        # === Critical stamina check ===
-        if hunter.stamina <= 0.06 and hunter.hideout:
-            hunter.log("is exhausted and trying to return to a hideout to rest.")
-            start = (hunter.x, hunter.y)
-            goal = (hunter.hideout.x, hunter.hideout.y)
-            path = astar(self.grid, start, goal)
+        # === Handle critical stamina scenario ===
+        if hunter.stamina <= 0.06:
+            if hunter.hideout:
+                # Move towards assigned hideout
+                hunter.log("is exhausted and trying to return to a hideout to rest.")
+                start = (hunter.x, hunter.y)
+                goal = (hunter.hideout.x, hunter.hideout.y)
+                path = astar(self.grid, start, goal)
 
-            if path:
-                next_pos = path[0]
-                dx = next_pos[0] - hunter.x
-                dy = next_pos[1] - hunter.y
-                hunter.log(f"critical stamina → heading to hideout using A* → next step: {next_pos}")
+                if path:
+                    next_pos = path[0]
+                    dx = next_pos[0] - hunter.x
+                    dy = next_pos[1] - hunter.y
+                    hunter.log(f"critical stamina → heading to hideout using A* → next step: {next_pos}")
+                else:
+                    dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
+                    hunter.log("no path to hideout found – moving randomly")
+
+            elif hunter.known_hideouts:
+                # Assign a remembered hideout and attempt to pathfind to it
+                hx, hy = hunter.known_hideouts[0]
+                hideout_cell = self.grid.get_cell(hx, hy)
+                if hideout_cell and hideout_cell.content:
+                    hunter.hideout = hideout_cell.content
+                    hunter.log(f"assigned to new hideout at ({hx}, {hy})")
+                    start = (hunter.x, hunter.y)
+                    goal = (hx, hy)
+                    path = astar(self.grid, start, goal)
+
+                    if path:
+                        next_pos = path[0]
+                        dx = next_pos[0] - hunter.x
+                        dy = next_pos[1] - hunter.y
+                        hunter.log(f"heading to assigned hideout using A* → next step: {next_pos}")
+                    else:
+                        dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
+                        hunter.log("no path to remembered hideout found – moving randomly")
+                else:
+                    dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
+                    hunter.log("known hideout is invalid – moving randomly")
+
             else:
                 dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
-                hunter.log("no path to hideout found – moving randomly")
+                hunter.log("exhausted and lost — no hideout known.")
 
-        # === Treasure Hunting ===
+        # === Treasure hunting and general movement ===
         else:
-            # Find the closest treasure
             best_treasure_pos = self.select_best_treasure(hunter)
 
             if best_treasure_pos:
@@ -67,17 +95,15 @@ class HunterController:
                 else:
                     dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
                     hunter.log("no path to treasure found – moving randomly")
-
             else:
-                # If no treasures are available or in range, explore randomly
                 dx, dy = random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
+                hunter.log("no known treasures – exploring randomly")
 
-        # Move the hunter
+        # === Move the hunter on the grid ===
         new_x, new_y = self.grid.wrap(hunter.x + dx, hunter.y + dy)
         new_cell = self.grid.get_cell(new_x, new_y)
 
         if new_cell.is_empty() or new_cell.cell_type == CellType.TREASURE:
-            print(f"✅ COLLECT TREASURE: {new_cell.cell_type}")
             old_cell = self.grid.get_cell(hunter.x, hunter.y)
             old_cell.clear()
 
@@ -94,10 +120,9 @@ class HunterController:
                 print(f"✅ COLLECT TREASURE02020: {new_cell.cell_type} {new_cell.content}")
                 treasure = new_cell.content  # Access the treasure object
                 hunter.collect_treasure(treasure)
-                hunter.log(
-                    f"collected treasurehere: {new_cell.content.treasure_type.name} (value={new_cell.content.value})")
-                new_cell.clear()  # Remove treasure from map
-                self.simulation_controller.remove_treasure_from_list(treasure)  # Remove from SimulationController
+                hunter.log(f"collected treasure: {treasure.treasure_type.name} (value={treasure.value})")
+                new_cell.clear()
+                self.simulation_controller.remove_treasure_from_list(treasure)
 
                 # Additionally clear the treasure from the grid and cell
                 self.grid.clear_cell(treasure.x, treasure.y)  # Ensure treasure is cleared from grid too
@@ -131,6 +156,3 @@ class HunterController:
                 best_target = (tx, ty)
 
         return best_target
-
-
-
