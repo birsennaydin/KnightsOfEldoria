@@ -15,7 +15,7 @@ from view.gui import Gui
 
 class SimulationController:
     def __init__(self):
-        self.grid = Grid(size=20)
+        self.grid = Grid(size=20, simulation_controller=self)
         self.hunters = []
         self.knights = []
         self.hideouts = []
@@ -34,6 +34,13 @@ class SimulationController:
         if treasure in self.treasures:
             self.treasures.remove(treasure)
             print(f"✅ TREASURE REMOVED001: {treasure}")
+
+    def add_treasure_to_list(self, treasure):
+        """Add treasure back to simulation list if it's not already included."""
+        print(f"✅ SHOULD TREASURE RE-ADDED TO SIMULATION?: {treasure}")
+        if treasure not in self.treasures:
+            self.treasures.append(treasure)
+            print(f"✅ TREASURE RE-ADDED TO SIMULATION: {treasure}")
 
     def remove_hunter_from_list(self, hunter):
         if hunter in self.hunters:

@@ -60,7 +60,7 @@ class KnightController:
                     self.random_patrol(knight)  # If path is blocked, patrol randomly
 
                 # Rule 5: If knight reaches target, interact with hunter (detain or challenge)
-                if (knight.target.x, knight.target.y) == (knight.x, knight.y):
+                if abs(knight.target.x - knight.x) + abs(knight.target.y - knight.y) == 1:
                     knight.interact_with_hunter(knight.target, method="detain")
                     knight.log(f"detained hunter: {knight.target.name}")
         else:

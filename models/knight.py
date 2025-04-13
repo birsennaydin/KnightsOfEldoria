@@ -133,14 +133,12 @@ class Knight:
         :param method: The action method (either 'detain' or 'challenge').
         """
         if method == "detain":
-            # If detaining, reduce hunter's stamina and force them to drop their treasure
-            hunter.stamina -= 0.05  # Decrease hunter's stamina by 5%
-            hunter.drop_treasure()  # Assuming a drop_treasure method exists in the Hunter class
+            hunter.stamina -= 0.05
+            hunter.drop_treasure(self.grid, self.grid.simulation_controller)
             self.log(f"Detained {hunter.name}, reduced stamina and forced to drop treasure.")
         elif method == "challenge":
-            # If challenging, reduce hunter's stamina more severely and force them to drop their treasure
-            hunter.stamina -= 0.20  # Decrease hunter's stamina by 20%
-            hunter.drop_treasure()  # Assuming a drop_treasure method exists in the Hunter class
+            hunter.stamina -= 0.20
+            hunter.drop_treasure(self.grid, self.grid.simulation_controller)
             self.log(f"Challenged {hunter.name}, reduced stamina significantly and forced to drop treasure.")
         else:
             self.log(f"Unknown interaction method: {method}")

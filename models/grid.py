@@ -3,8 +3,9 @@ from utils.enums import CellType
 
 
 class Grid:
-    def __init__(self, size):
+    def __init__(self, size, simulation_controller=None):
         self.size = size
+        self.simulation_controller = simulation_controller
         self.cells = [[Cell(x, y) for x in range(size)] for y in range(size)]
 
     def get_cell(self, x, y):
