@@ -26,7 +26,7 @@ class SimulationController:
         self.knight_controller = KnightController(self.grid)
 
         self._populate_random_grid()
-        self.gui = Gui(self.grid)
+        self.gui = Gui(self.grid, self)
 
     def remove_treasure_from_list(self, treasure):
         """Remove the treasure from the simulation."""
