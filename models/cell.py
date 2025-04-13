@@ -5,8 +5,8 @@ class Cell:
     def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
-        self.content = None          # The object in the cell (Treasure, Hunter, etc.)
-        self.cell_type = CellType.EMPTY  # Type of the cell content
+        self.content = None          # The entity currently in this cell (e.g., Treasure, Hunter, etc.)
+        self.cell_type = CellType.EMPTY  # The type of the content occupying this cell
 
     def is_empty(self) -> bool:
         return self.cell_type == CellType.EMPTY
@@ -16,7 +16,7 @@ class Cell:
         self.cell_type = cell_type
 
     def clear(self):
-        """Remove content from the cell."""
+        """Clear the cell content unless it is a permanent structure like a Hideout or Garrison."""
         if self.cell_type not in {CellType.HIDEOUT, CellType.GARRISON}:
             self.content = None
             self.cell_type = CellType.EMPTY

@@ -29,14 +29,14 @@ class SimulationController:
         self.gui = Gui(self.grid)
 
     def remove_treasure_from_list(self, treasure):
-        """Remove the treasure from the Simulation."""
+        """Remove the treasure from the simulation."""
         print(f"✅ TREASURE REMOVED000: {treasure}")
         if treasure in self.treasures:
             self.treasures.remove(treasure)
             print(f"✅ TREASURE REMOVED001: {treasure}")
 
     def add_treasure_to_list(self, treasure):
-        """Add treasure back to simulation list if it's not already included."""
+        """Add the treasure back to the simulation list if it's not already present."""
         print(f"✅ SHOULD TREASURE RE-ADDED TO SIMULATION?: {treasure}")
         if treasure not in self.treasures:
             self.treasures.append(treasure)
@@ -61,30 +61,32 @@ class SimulationController:
         num_hideout = int(total_cells * 0.05)
         num_garrison = int(total_cells * 0.03)
 
-        # Add Garrisons to grid
-        for _ in range(num_garrison):  # Place Garrisons
+        # Place garrisons on the grid
+        for _ in range(num_garrison):
             x, y = all_positions.pop()
-            garrison = Garrison(x, y)  # Garrison class
+            garrison = Garrison(x, y)
             self.grid.place_garrison(garrison)
             self.garrisons.append(garrison)
 
+        # Place treasures on the grid
         for _ in range(num_treasure):
             x, y = all_positions.pop()
             t_type = random.choice(list(TreasureType))
             print(f"✅ SIMULATIONTR: {t_type}")
             treasure = Treasure(t_type, x, y)
             print(f"✅ SIMULATIONTR00:  {treasure}")
-
             self.grid.place_treasure(treasure)
             self.treasures.append(treasure)
             print("✅ SIMULATIONTR111: ", self.treasures)
 
+        # Place knights on the grid
         for _ in range(num_knight):
             x, y = all_positions.pop()
             knight = Knight(f"Knight-{x}-{y}", x, y, self.grid)
             self.grid.place_knight(knight)
             self.knights.append(knight)
 
+        # Place hunters on the grid
         for _ in range(num_hunter):
             x, y = all_positions.pop()
             skill = random.choice(list(HunterSkill))
@@ -92,16 +94,17 @@ class SimulationController:
             self.grid.place_hunter(hunter)
             self.hunters.append(hunter)
 
+        # Place hideouts on the grid
         for _ in range(num_hideout):
             x, y = all_positions.pop()
             hideout = Hideout(x, y)
             self.grid.place_hideout(hideout)
             self.hideouts.append(hideout)
 
-        # The remaining cells will be empty
+        # Ensure remaining cells are empty
         for _ in range(num_empty):
             x, y = all_positions.pop()
-            self.grid.get_cell(x, y).clear()  # Ensures the cell is empty
+            self.grid.get_cell(x, y).clear()
 
     def run(self, steps=100):
         for step in range(steps):
@@ -121,12 +124,10 @@ class SimulationController:
                     self.treasures.remove(treasure)
                     print("✅ TREASURE REMOVE: ", self.treasures, treasure)
 
-            # for just hunters which in the hideout
+            # Let hideouts share knowledge and attempt to recruit
             for hideout in self.hideouts:
                 hideout.share_knowledge()
                 hideout.try_recruit()
-
-
 
             # === Termination Condition ===
             all_hunters_dead = all(not h.alive for h in self.hunters)

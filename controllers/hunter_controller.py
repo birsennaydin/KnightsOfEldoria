@@ -9,13 +9,13 @@ class HunterController:
         self.simulation_controller = simulation_controller  # Reference to SimulationController
 
     def process(self, hunter):
-        # If hunter is not alive, remove them from the simulation
+        # If the hunter is not alive, remove them from the simulation
         if not hunter.alive:
             self.simulation_controller.remove_hunter_from_list(hunter)
             hunter.log(f"is dead at ({hunter.x}, {hunter.y})")
             return
 
-        # If hunter is inside a hideout
+        # If the hunter is inside a hideout
         if hunter.is_at_hideout():
             if hunter.carrying:
                 hunter.log(f"reached hideout at ({hunter.x}, {hunter.y})")
@@ -24,12 +24,12 @@ class HunterController:
             hunter.rest()
             return
 
-        # If stamina is exactly 0, set collapsing state if not already collapsing
+        # If stamina is exactly 0, set collapsing state if not already set
         if hunter.stamina == 0 and not hunter.collapsing:
             hunter.collapsing = True
             hunter.log("has reached 0 stamina and is collapsing.")
 
-        # If hunter is collapsing, perform collapse check
+        # If the hunter is collapsing, perform collapse check
         if hunter.collapsing:
             hunter.collapse_check()
             return
@@ -37,7 +37,7 @@ class HunterController:
         # === Handle critical stamina scenario ===
         if hunter.stamina <= 0.06:
             if hunter.hideout:
-                # Move towards assigned hideout
+                # Move toward assigned hideout
                 hunter.log("is exhausted and trying to return to a hideout to rest.")
                 start = (hunter.x, hunter.y)
                 goal = (hunter.hideout.x, hunter.hideout.y)
@@ -110,12 +110,12 @@ class HunterController:
             hunter.x, hunter.y = new_x, new_y
             hunter.move()
 
-            # Scan surroundings and remember
+            # Scan surroundings and remember them
             nearby = self.grid.get_cells_in_radius(hunter.x, hunter.y, 1)
             hunter.scan_and_remember(nearby)
 
             print(f"✅ COLLECT TREASURE01010: {new_cell.cell_type}")
-            # Check if current cell has treasure
+            # Check if the current cell has treasure
             if new_cell.cell_type == CellType.TREASURE and new_cell.content:
                 print(f"✅ COLLECT TREASURE02020: {new_cell.cell_type} {new_cell.content}")
                 treasure = new_cell.content  # Access the treasure object
@@ -125,7 +125,7 @@ class HunterController:
                 self.simulation_controller.remove_treasure_from_list(treasure)
 
                 # Additionally clear the treasure from the grid and cell
-                self.grid.clear_cell(treasure.x, treasure.y)  # Ensure treasure is cleared from grid too
+                self.grid.clear_cell(treasure.x, treasure.y)  # Ensure the treasure is cleared from the grid as well
                 print(f"✅ Treasure {treasure.treasure_type.name} collected and removed from grid.")
 
             new_cell.set_content(hunter, cell_type=CellType.HUNTER)
@@ -137,7 +137,7 @@ class HunterController:
         for (tx, ty) in hunter.known_treasures:
             treasure_cell = self.grid.get_cell(tx, ty)
 
-            # Skip if it's not really a treasure
+            # Skip if the cell does not contain a valid treasure
             if not treasure_cell.content or treasure_cell.cell_type.name != "TREASURE":
                 continue
 

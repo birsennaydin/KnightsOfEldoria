@@ -19,7 +19,7 @@ class Gui(tk.Tk):
             CellType.TREASURE: "gold",
             CellType.KNIGHT: "red",
             CellType.HIDEOUT: "green",
-            CellType.GARRISON: "purple"  # Garrison için renk ekledik
+            CellType.GARRISON: "purple"  # Added color for garrison
         }
 
         self.grid_frame = tk.Frame(self)
@@ -32,6 +32,7 @@ class Gui(tk.Tk):
         self._draw_grid()
 
     def _draw_legend(self):
+        """Draw legend showing color representation for each cell type."""
         for cell_type, color in self.color_map.items():
             color_box = tk.Label(self.legend_panel, bg=color, width=2, height=1, relief="solid")
             label = tk.Label(self.legend_panel, text=cell_type.name.title())
@@ -39,6 +40,7 @@ class Gui(tk.Tk):
             label.pack(side=tk.LEFT, padx=5)
 
     def _draw_grid(self):
+        """Render the grid by drawing each cell with the corresponding color."""
         for widget in self.grid_frame.winfo_children():
             widget.destroy()
 
@@ -51,14 +53,17 @@ class Gui(tk.Tk):
                 canvas.grid(row=y, column=x)
 
     def render(self):
+        """Redraw the grid and update the window."""
         self._draw_grid()
         self.update()
         self.update_idletasks()
 
     def on_closing(self):
+        """Handle the window close event with confirmation dialog."""
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             self.__closed = True
             self.destroy()
 
     def is_closed(self) -> bool:
+        """Check if the window has been closed."""
         return self.__closed

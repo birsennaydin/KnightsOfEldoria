@@ -34,6 +34,7 @@ class Hunter:
         return self.carrying is not None
 
     def deliver_treasure(self):
+        # Deliver the carried treasure to the hideout
         if self.carrying:
             self.hideout.stored_treasures.append(self.carrying)
             self.log(
@@ -42,9 +43,11 @@ class Hunter:
             self.carrying = None
 
     def collect_treasure(self, treasure):
+        # Pick up the treasure
         self.carrying = treasure
 
     def scan_and_remember(self, nearby_cells):
+        # Scan nearby cells to remember treasure and hideout positions
         for cell in nearby_cells:
             self.log(f"SCAN AND REMEMBER. {cell}")
             if cell.cell_type.name == "TREASURE" and cell.content:
@@ -57,6 +60,7 @@ class Hunter:
                     self.known_hideouts.append(pos)
 
     def collapse_check(self):
+        # Increment collapse counter and check if hunter has fully collapsed
         self.collapse_counter += 1
         self.log(f"is collapsing... ({self.collapse_counter}/3)")
         if self.collapse_counter >= 3:
@@ -81,6 +85,7 @@ class Hunter:
 
         self.log(f"DROP TREASURE - TREASURE {treasure}")
         self.log(f"DROP TREASURE - Hunter location: {self.x} {self.y}")
+
         # Find valid escape cells
         neighbors = grid.get_neighbors(self.x, self.y)
         self.log(f"DROP TREASURE - NEIGHBORS: {neighbors}")
@@ -116,6 +121,7 @@ class Hunter:
                     self.known_treasures.append((old_x, old_y))
                     self.log(f"DROP TREASURE - KNOWN TREASURE LIST {self.known_treasures}")
 
+                # Clear carried treasure
                 self.carrying = None
                 self.log(f"DROP TREASURE - CARRYING {self.carrying}")
                 self.log(f"dropped treasure at ({old_x}, {old_y}) and fled to ({new_x}, {new_y})")

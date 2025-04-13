@@ -1,20 +1,17 @@
 import heapq
-
 from utils.enums import CellType
 
-
 def heuristic(a, b):
-    """Manhattan mesafesi hesaplayıcı (dik hareket için uygun)"""
+    """Calculate Manhattan distance (suitable for grid-based movement)"""
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
-
 
 def astar(grid, start, goal, role="default"):
     """
-    A* algoritması ile grid üzerinde start → goal arası en kısa yolu bulur.
-    :param grid: Grid nesnesi
+    Finds the shortest path from start to goal using the A* algorithm on a grid.
+    :param grid: Grid object
     :param start: (x, y) tuple
     :param goal: (x, y) tuple
-    :return: [(x1, y1), (x2, y2), ...] yol dizisi
+    :return: path as a list of (x, y) tuples: [(x1, y1), (x2, y2), ...]
     """
     open_set = []
     heapq.heappush(open_set, (0, start))
@@ -26,7 +23,7 @@ def astar(grid, start, goal, role="default"):
         _, current = heapq.heappop(open_set)
 
         if current == goal:
-
+            # Reconstruct path by backtracking from goal
             path = []
             while current in came_from:
                 path.append(current)
@@ -34,13 +31,13 @@ def astar(grid, start, goal, role="default"):
             path.reverse()
             return path
 
+        # Use different neighbor selection based on role
         if role == "knight":
             neighbors = grid.get_knight_neighbors(*current)
         else:
             neighbors = grid.get_neighbors(*current)
 
         for neighbor in neighbors:
-
             tentative_g = g_score[current] + 1
             if neighbor not in g_score or tentative_g < g_score[neighbor]:
                 came_from[neighbor] = current

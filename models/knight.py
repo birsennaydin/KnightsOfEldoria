@@ -24,13 +24,13 @@ class Knight:
 
     def rest_at_garrison(self):
         """
-        Garrison içinde dinlenme fonksiyonu:
-        Eğer knight enerjisi %20'nin altına düşerse, en yakın garrison'a gider ve dinlenir.
+        Resting function inside the garrison:
+        If the knight's energy falls below 20%, they go to the nearest garrison and rest.
         """
-        if self.is_exhausted() and self.garrison:  # Eğer knight yorgunsa ve bir garrison'a sahipse
+        if self.is_exhausted() and self.garrison:  # If knight is exhausted and has a garrison
             self.resting = True
-            self.garrison.add_knight(self)  # Knight'ı garrison'a ekle
-            self.rest()  # Dinlenme işlemini başlat
+            self.garrison.add_knight(self)  # Add the knight to the garrison
+            self.rest()  # Start the resting process
             print(f"{self.name} is resting at the garrison.")
 
     def move(self):
@@ -51,14 +51,14 @@ class Knight:
         return self.energy <= 0.2
 
     def rest(self):
-        """Garrison'da dinlenme."""
+        """Resting at the garrison."""
         print(f"{self} - KNIGHT REST.")
         self.energy += 0.1
         if self.energy >= 1.0:
-            self.energy = 1.0  # Enerji 100% geçmemeli
+            self.energy = 1.0  # Energy should not exceed 100%
             self.resting = False
             print(f"{self} - KNIGHT ENERGY IS READY.")
-            # Dinlenme tamamlandığında knight'ı garrison'dan çıkarıyoruz
+            # When rest is complete, remove the knight from the garrison
             if self.garrison:
                 print(f"{self.name} THERE IS GARRISON. {self.garrison}")
                 self.garrison.remove_knight(self)

@@ -8,17 +8,16 @@ class Garrison:
         self.x = x
         self.y = y
         self.capacity = 5
-        self.knights = []  # Garrison'da bulunan knight'lar
-        self.knight_patrols = []  # Knightların yakın zamanda yaptığı devriye
-
+        self.knights = []  # Knights currently in the garrison
+        self.knight_patrols = []  # Patrols recently performed by knights
 
     def add_knight(self, knight):
         """Add knight to the garrison for resting."""
-        # Eğer knight dinlenmeye ihtiyacı varsa, garrison'a ekleyin
+        # If the knight needs rest, add to the garrison
         self.knights.append(knight)
         knight.resting = True
-        knight.garrison = self  # Garrison'ı knight'a atıyoruz
-        knight.rest()  # Knight dinlenmeye başlar
+        knight.garrison = self  # Assign this garrison to the knight
+        knight.rest()  # Start resting process
         print(f"{knight.name} is resting at the garrison. Function: add_knight")
 
     def remove_knight(self, knight):
@@ -31,7 +30,7 @@ class Garrison:
 
     def share_knowledge(self):
         """
-        Tüm bilinen devriye ve garrison bilgilerini paylaşıyoruz.
+        Share all known patrol and garrison-related information among all knights.
         """
         all_knight_patrols = set()
         for knight in self.knights:
@@ -39,19 +38,21 @@ class Garrison:
 
         for knight in self.knights:
             knight.memory = list(set(knight.memory) | all_knight_patrols)
-            # Diğer knight'lar için paylaşılan bilgi
+            # Shared patrol information for other knights
             knight.known_knight_patrols = self.knight_patrols
 
     def try_recruit(self):
-            new_name = f"Recruit-{self.x}-{self.y}-{random.randint(100, 999)}"
-            new_knight = Knight(new_name, self.x, self.y)
-            self.add_knight(new_knight)
-            new_knight.log(f"has been recruited with skill: {new_knight.name}")
-
+        """
+        Attempt to recruit a new knight to the garrison.
+        """
+        new_name = f"Recruit-{self.x}-{self.y}-{random.randint(100, 999)}"
+        new_knight = Knight(new_name, self.x, self.y)
+        self.add_knight(new_knight)
+        new_knight.log(f"has been recruited with skill: {new_knight.name}")
 
     def rest_knights(self):
         """
-        Garrison'da dinlenmek için knight'ların enerji yenilemesi işlemi.
+        Restore energy of knights resting in the garrison.
         """
         for knight in self.knights:
             if knight.is_exhausted():

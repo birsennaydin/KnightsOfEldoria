@@ -12,17 +12,19 @@ class Hideout:
         self.hunters = []
         self.treasures = []
         self.knight_patrols = []  # Track recent knight patrols
-        self.stored_treasures = [] # Store treasures
+        self.stored_treasures = []  # Store delivered treasures
 
     def store_treasure(self, treasure):
         self.treasures.append(treasure)
 
     def add_hunter(self, hunter):
+        # Add hunter to the hideout if there is available capacity
         if len(self.hunters) < self.capacity:
             self.hunters.append(hunter)
             hunter.hideout = self
 
     def remove_hunter(self, hunter):
+        # Remove hunter from the hideout
         if hunter in self.hunters:
             self.hunters.remove(hunter)
             hunter.hideout = None
@@ -41,7 +43,7 @@ class Hideout:
         for h in self.hunters:
             h.known_treasures = list(set(h.known_treasures) | all_treasures)
             h.known_hideouts = list(set(h.known_hideouts) | all_hideouts)
-            # Share knight patrol information as well
+            # Also share knight patrol information
             h.known_knight_patrols = self.knight_patrols
 
     def try_recruit(self):
@@ -49,17 +51,19 @@ class Hideout:
         Attempt to recruit a new hunter with 20% probability
         if hideout is not full and has a variety of skills.
         """
-        # Do not proceed if hideout is already full
+        # Do not recruit if hideout is already full
         if len(self.hunters) >= self.capacity:
             return
 
+        # Check for diversity in hunter skills
         existing_skills = list({h.skill for h in self.hunters})
         if len(existing_skills) < 2:
-            return  # Not diverse enough
+            return  # Not enough diversity
 
+        # 20% chance to recruit a new hunter
         if random.random() <= RECRUIT_PROBABILITY:
             new_skill = random.choice(existing_skills)
             new_name = f"Recruit-{self.x}-{self.y}-{random.randint(100, 999)}"
             new_hunter = Hunter(new_name, new_skill, self.x, self.y)
-            self.add_hunter(new_hunter) # Create new hunter with diverse existing skill
+            self.add_hunter(new_hunter)  # Create new hunter with one of the existing diverse skills
             new_hunter.log(f"has been recruited with skill: {new_skill.name}")
