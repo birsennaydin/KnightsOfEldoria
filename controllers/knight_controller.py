@@ -47,9 +47,9 @@ class KnightController:
                     knight.move_to(next_x, next_y)
 
                     knight.log(
-                        f"KNIGHT 000 current position: ({knight.x}, {knight.y}), "
-                        f"KNIGHT 000 energy: {knight.energy}, "
-                        f"KNIGHT 000 resting: {knight.resting}"
+                        f"KNIGHT Current Position: ({knight.x}, {knight.y}), "
+                        f"KNIGHT Energy: {knight.energy}, "
+                        f"KNIGHT Resting: {knight.resting}"
                     )
 
                     knight.energy -= 0.2  # Energy decreases with movement
@@ -75,3 +75,9 @@ class KnightController:
         knight.move_to(new_x, new_y)  # Move the knight to the new position
         knight.energy -= 0.2  # Patrolling consumes some energy
         knight.log(f"{knight.name} is patrolling to ({new_x}, {new_y})")
+
+        # Check if a hunter is at the new location
+        cell = self.grid.get_cell(new_x, new_y)
+        if cell and cell.cell_type == CellType.HUNTER and cell.content:
+            knight.interact_with_hunter(cell.content, method="detain")
+            knight.log(f"{knight.name} randomly encountered and detained hunter: {cell.content.name}")
