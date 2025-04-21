@@ -11,12 +11,15 @@ class Hunter:
         self.y = y
         self.stamina = 1.0
         self.carrying = None
-        self.hideout = None
         self.known_treasures = []
         self.known_hideouts = []
+        self.known_knights = []
         self.alive = True
         self.collapsing = False
         self.collapse_counter = 0
+        self.resting = False
+        self.assigned_hideout = None
+        self.in_hideout = None
 
     def move(self):
         self.stamina -= 0.02
@@ -24,23 +27,39 @@ class Hunter:
             self.stamina = 0
             self.collapsing = True
 
-    def rest(self):
+    def rest(self, grid):
         self.stamina = min(1.0, self.stamina + 0.01)
 
-    def is_at_hideout(self):
-        return self.hideout and self.x == self.hideout.x and self.y == self.hideout.y
+        if self.stamina >= 1.0:
+            self.stamina = 1.0
+            self.collapsing = False
+            self.collapse_counter = 0
+
+            if self.in_hideout is not None:
+                # Remove from the hideout
+                self.in_hideout.remove_hunter(self, grid)
+                self.log(f"fully rested and left the hideout at ({self.x}, {self.y})")
+
+    def is_resting_in_hideout(self):
+        self.log(f"is_resting_in_hideout ({self.in_hideout} , {self.stamina})")
+        return self.in_hideout is not None
 
     def wants_to_return(self):
         return self.carrying is not None
 
-    def deliver_treasure(self):
+    def deliver_treasure(self, simulation_controller):
         # Deliver the carried treasure to the hideout
         if self.carrying:
-            self.hideout.stored_treasures.append(self.carrying)
             self.log(
-                f"delivered treasure: {self.carrying.treasure_type.name} → Hideout @ ({self.hideout.x}, {self.hideout.y})"
+                f"delivered treasure: {self.carrying} → In Hıdeout {self.in_hideout})"
             )
-            self.carrying = None
+            if self.in_hideout is not None:
+                self.in_hideout.stored_treasures.append(self.carrying)
+                self.log(
+                    f"delivered treasure: {self.carrying.treasure_type.name} → Hideout @ ({self.in_hideout.x}, {self.in_hideout.y})"
+                )
+                simulation_controller.remove_treasure_from_list(self.carrying)
+                self.carrying = None
 
     def collect_treasure(self, treasure):
         # Pick up the treasure
@@ -58,6 +77,10 @@ class Hunter:
                 pos = (cell.x, cell.y)
                 if pos not in self.known_hideouts:
                     self.known_hideouts.append(pos)
+            elif cell.cell_type.name == "KNIGHT" and cell.content:
+                pos = (cell.x, cell.y)
+                if pos not in self.known_knights:
+                    self.known_knights.append(pos)
 
     def collapse_check(self):
         # Increment collapse counter and check if hunter has fully collapsed

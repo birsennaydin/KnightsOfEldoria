@@ -31,9 +31,11 @@ class SimulationController:
     def remove_treasure_from_list(self, treasure):
         """Remove the treasure from the simulation."""
         print(f"✅ TREASURE REMOVED000: {treasure}")
+        print(f"✅ TREASURES LIST REMOVED000: {self.treasures}")
         if treasure in self.treasures:
             self.treasures.remove(treasure)
             print(f"✅ TREASURE REMOVED001: {treasure}")
+        print(f"✅ TREASURE AFTER LIST: {self.treasures}")
 
     def add_treasure_to_list(self, treasure):
         """Add the treasure back to the simulation list if it's not already present."""
@@ -127,12 +129,23 @@ class SimulationController:
             # Let hideouts share knowledge and attempt to recruit
             for hideout in self.hideouts:
                 hideout.share_knowledge()
-                hideout.try_recruit()
+                hideout.try_recruit(self.grid)
+
+            print(f"✅ LAST COUNT: TREASURE: {len(self.treasures)}, "
+                  f"CARRYING: {all(hunter.carrying is None for hunter in self.hunters) }, "
+                  f"HIDEOUT STORED TREASURE: {all(len(h.stored_treasures) == 0 for h in self.hideouts)},"
+                  f"HUNTERS:{self.hunters},"
+                  f"DEAD HUNTERS: {all(not h.alive for h in self.hunters)},")
 
             # === Termination Condition ===
+            no_active_treasure = (
+                    len(self.treasures) == 0 and
+                    all(hunter.carrying is None for hunter in self.hunters)
+            )
+
             all_hunters_dead = all(not h.alive for h in self.hunters)
-            if not self.treasures or all_hunters_dead:
-                print("✅ Simulation stopped: No treasure or all hunters are dead.")
+            if no_active_treasure or all_hunters_dead:
+                print("✅ Simulation stopped: No more treasure to collect or all hunters are dead.")
                 break
 
             self.gui.render()
