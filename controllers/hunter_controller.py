@@ -1,3 +1,4 @@
+from models.treasure import Treasure
 from utils.enums import CellType
 from ai.pathfinding.astar import astar
 import random
@@ -247,48 +248,57 @@ class HunterController:
         or scans nearby cells for treasure or empty fallback.
         """
         # === 1. If there are known treasures ===
-        if hunter.known_treasures:
-            hunter.log(f"📦 TREASUREEEE PATH {hunter.known_treasures}")
+        valid_known_treasures = [
+            pos for pos in hunter.known_treasures
+            if self.grid.get_cell(*pos).cell_type == CellType.TREASURE and
+               isinstance(self.grid.get_cell(*pos).content, Treasure)
+        ]
+
+        if valid_known_treasures:
             sorted_treasures = sorted(
-                hunter.known_treasures,
-                key=lambda pos: (abs(hunter.x - pos[0]) + abs(hunter.y - pos[1]),
-                                 -self.grid.get_cell(*pos).content.value)
+                valid_known_treasures,
+                key=lambda pos: (
+                    abs(hunter.x - pos[0]) + abs(hunter.y - pos[1]),
+                    -self.grid.get_cell(*pos).content.value
+                )
             )
-            hunter.log(f"📦 TREASUREEEE PATH0({sorted_treasures})")
+
             for treasure_pos in sorted_treasures:
                 path = astar(self.grid, (hunter.x, hunter.y), treasure_pos)
                 if path:
                     is_safe = all(
-                        self.grid.get_cell(*pos).cell_type not in [CellType.KNIGHT, CellType.GARRISON, CellType.HIDEOUT]
+                        self.grid.get_cell(*pos).cell_type not in [
+                            CellType.KNIGHT, CellType.GARRISON, CellType.HIDEOUT
+                        ]
                         for pos in path
                     )
                     if is_safe:
                         return path
 
-        # === 2. Check if there is treasure nearby (1-cell radius) ===
+        # === 2. Check nearby (1-cell radius) for treasure ===
         neighbors = self.grid.get_neighbors(hunter.x, hunter.y)
         best_treasure = None
         best_value = -1
 
         for nx, ny in neighbors:
             cell = self.grid.get_cell(nx, ny)
-            if cell.cell_type == CellType.TREASURE and cell.content:
+            if cell.cell_type == CellType.TREASURE and isinstance(cell.content, Treasure):
                 if cell.content.value > best_value:
                     best_value = cell.content.value
                     best_treasure = (nx, ny)
 
         if best_treasure:
             hunter.log(f"🔍 No known treasure, but found nearby treasure at {best_treasure}")
-            return [best_treasure]  # If there is a treasure one step away
+            return [best_treasure]  # If there's a nearby treasure
 
-        # === 3. If no treasure, head towards an empty cell ===
+        # === 3. Fallback to empty cell ===
         for nx, ny in neighbors:
             cell = self.grid.get_cell(nx, ny)
             if cell.is_empty():
                 hunter.log(f"🔄 No treasure found — fallback to empty cell at ({nx}, {ny})")
                 return [(nx, ny)]
 
-        return None  # No valid movement found
+        return None  # No valid move
 
     def get_safe_path_to_hideout(self, hunter):
         """
