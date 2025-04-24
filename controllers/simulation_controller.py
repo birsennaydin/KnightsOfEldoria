@@ -1,4 +1,5 @@
 import random
+import sys
 import time
 
 from models.garrison import Garrison
@@ -15,6 +16,8 @@ from view.gui import Gui
 
 class SimulationController:
     def __init__(self):
+        sys.stdout = open("simulation_log.txt", "w", buffering=1)
+
         self.grid = Grid(size=20, simulation_controller=self)
         self.hunters = []
         self.knights = []
@@ -24,6 +27,8 @@ class SimulationController:
 
         self.hunter_controller = HunterController(self.grid, self)
         self.knight_controller = KnightController(self.grid)
+
+        print(f"SIMULATION CONTROLLER IS STARTING: {self}", flush=True)
 
         self._populate_random_grid()
         self.gui = Gui(self.grid, self)
@@ -56,12 +61,19 @@ class SimulationController:
         all_positions = [(x, y) for x in range(size) for y in range(size)]
         random.shuffle(all_positions)
 
-        num_empty = int(total_cells * 0.5)
-        num_treasure = int(total_cells * 0.2)
+        num_empty = int(total_cells * 0.55)
+        num_treasure = int(total_cells * 0.15)
         num_knight = int(total_cells * 0.12)
         num_hunter = int(total_cells * 0.1)
         num_hideout = int(total_cells * 0.05)
         num_garrison = int(total_cells * 0.03)
+
+        print(f"SIMULATION num_empty: {num_empty},"
+              f"num_treasure: {num_treasure},"
+              f"num_knight: {num_knight},"
+              f"num_hunter: {num_hunter},"
+              f"num_hideout: {num_hideout},"
+              f"num_garrison: {num_garrison}")
 
         # Place garrisons on the grid
         for _ in range(num_garrison):
@@ -70,16 +82,16 @@ class SimulationController:
             self.grid.place_garrison(garrison)
             self.garrisons.append(garrison)
 
+        print(f"SIMULATION ALL GARRISON LIST: {len(self.garrisons)}")
         # Place treasures on the grid
         for _ in range(num_treasure):
             x, y = all_positions.pop()
             t_type = random.choice(list(TreasureType))
-            print(f"✅ SIMULATIONTR: {t_type}")
             treasure = Treasure(t_type, x, y)
-            print(f"✅ SIMULATIONTR00:  {treasure}")
             self.grid.place_treasure(treasure)
             self.treasures.append(treasure)
-            print("✅ SIMULATIONTR111: ", self.treasures)
+
+        print(f"SIMULATION ALL TREASURE LIST: {len(self.treasures)}")
 
         # Place knights on the grid
         for _ in range(num_knight):
@@ -87,6 +99,8 @@ class SimulationController:
             knight = Knight(f"Knight-{x}-{y}", x, y, self.grid)
             self.grid.place_knight(knight)
             self.knights.append(knight)
+
+        print(f"SIMULATION ALL KNIGHT LISTs: {len(self.knights)}")
 
         # Place hunters on the grid
         for _ in range(num_hunter):
@@ -96,6 +110,8 @@ class SimulationController:
             self.grid.place_hunter(hunter)
             self.hunters.append(hunter)
 
+        print(f"SIMULATION ALL HUNTER LISTS: {len(self.hunters)}")
+
         # Place hideouts on the grid
         for _ in range(num_hideout):
             x, y = all_positions.pop()
@@ -103,22 +119,28 @@ class SimulationController:
             self.grid.place_hideout(hideout)
             self.hideouts.append(hideout)
 
+        print(f"SIMULATION ALL HIDEOUT LISTS: {len(self.hideouts)}")
+
         # Ensure remaining cells are empty
         for _ in range(num_empty):
             x, y = all_positions.pop()
             self.grid.get_cell(x, y).clear()
 
     def run(self, steps=100):
+
         for step in range(steps):
             if self.gui.is_closed():
                 break
-
+            print(f"RUN HUNTER LIST: {self.hunters}")
             for hunter in self.hunters:
+                print(f"RUN HUNTER: {hunter}")
                 self.hunter_controller.process(hunter)
 
+            print(f"RUN KNIGHT LIST: {self.knights}")
             for knight in self.knights:
                 self.knight_controller.process(knight)
 
+            print(f"RUN TREASURE LIST: {self.treasures}")
             for treasure in list(self.treasures):
                 treasure.decay()
                 if treasure.is_depleted():
@@ -126,6 +148,7 @@ class SimulationController:
                     self.treasures.remove(treasure)
                     print("✅ TREASURE REMOVE: ", self.treasures, treasure)
 
+            print(f"RUN HIDEOUT LIST: {self.hideouts}")
             # Let hideouts share knowledge and attempt to recruit
             for hideout in self.hideouts:
                 hideout.share_knowledge()
@@ -150,3 +173,19 @@ class SimulationController:
 
             self.gui.render()
             time.sleep(0.2)
+
+    def __str__(self):
+        return (
+                f"\n--- SimulationController ---\n"
+                f"Grid Size: {self.grid.size} x {self.grid.size}\n\n"
+                f"Hunters ({len(self.hunters)}):\n" +
+                "\n".join(f"  - {hunter}" for hunter in self.hunters) + "\n\n" +
+                f"Knights ({len(self.knights)}):\n" +
+                "\n".join(f"  - {knight}" for knight in self.knights) + "\n\n" +
+                f"Hideouts ({len(self.hideouts)}):\n" +
+                "\n".join(f"  - {hideout}" for hideout in self.hideouts) + "\n\n" +
+                f"Treasures ({len(self.treasures)}):\n" +
+                "\n".join(f"  - {treasure}" for treasure in self.treasures) + "\n\n" +
+                f"Garrisons ({len(self.garrisons)}):\n" +
+                "\n".join(f"  - {garrison}" for garrison in self.garrisons) + "\n"
+        )

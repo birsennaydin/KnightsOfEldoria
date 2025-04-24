@@ -7,6 +7,7 @@ class KnightController:
         self.grid = grid
 
     def process(self, knight):
+        knight.log(f"KNIGHT CONTROLLER IS STARTING {knight}, {knight.name}")
 
         # Rule 1: If the knight is already resting, continue resting
         if knight.resting:

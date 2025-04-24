@@ -7,6 +7,7 @@ class Grid:
         self.size = size
         self.simulation_controller = simulation_controller
         self.cells = [[Cell(x, y) for x in range(size)] for y in range(size)]
+        print(f"✅ SIZE AND GRID: {self.size}, {self.cells}")
 
     def get_cell(self, x, y):
         if 0 <= x < self.size and 0 <= y < self.size:
@@ -15,7 +16,8 @@ class Grid:
 
     def clear_cell(self, x, y):
         cell = self.get_cell(x, y)
-        if cell:
+        print(f"✅ CLEAR CELL 0 : {cell}, {cell.cell_type}")
+        if cell and cell.cell_type not in {CellType.HIDEOUT, CellType.GARRISON}:
             cell.clear()
 
     def wrap(self, x, y):
@@ -52,7 +54,7 @@ class Grid:
     def remove_knight(self, x, y):
         # Remove knight from the specified cell
         cell = self.get_cell(x, y)
-        if cell:
+        if cell and cell.cell_type not in {CellType.HIDEOUT, CellType.GARRISON}:
             cell.clear()
 
     def place_hideout(self, hideout):
@@ -73,6 +75,9 @@ class Grid:
         Only includes cells that are empty, treasure, or hideout,
         and excludes cells occupied by a knight.
         """
+
+        print(f"\n📍 [DEBUG] get_neighbors called for ({x}, {y})")
+
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         neighbors = []
 
@@ -83,6 +88,9 @@ class Grid:
             # Accept cell if it's empty, contains treasure or hideout, and is not a knight
             if (cell.is_empty() or cell.cell_type == CellType.TREASURE or cell.cell_type == CellType.HIDEOUT) and cell.cell_type != CellType.KNIGHT:
                 neighbors.append((nx, ny))
+                print(f"  ✅ Accepted as neighbor type is: {cell.cell_type}, x={nx}, y={ny}")
+            else:
+                print(f"  ❌ Rejected neighbor (type={cell.cell_type}, x={nx}, y={ny})")
 
         return neighbors
 

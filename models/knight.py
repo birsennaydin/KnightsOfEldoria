@@ -142,3 +142,10 @@ class Knight:
             self.log(f"Challenged {hunter.name}, reduced stamina significantly and forced to drop treasure.")
         else:
             self.log(f"Unknown interaction method: {method}")
+
+    def __str__(self):
+        """String representation of the treasure."""
+        return f"Knight(type={self.name}, x={self.x}, y={self.y}, energy={self.energy}, alive={self.alive}, memory={self.memory}, garrison={self.garrison})"
+
+    def __repr__(self):
+        return self.__str__()

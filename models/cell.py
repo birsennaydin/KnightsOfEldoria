@@ -17,9 +17,13 @@ class Cell:
 
     def clear(self):
         """Clear the cell content unless it is a permanent structure like a Hideout or Garrison."""
+        print(f"🧹 CLEARING CELL ({self.x}, {self.y}) - TYPE: {self.cell_type.name} - TYPE: {self.cell_type}")
         if self.cell_type not in {CellType.HIDEOUT, CellType.GARRISON}:
+            print(f"✅ Cell cleared: ({self.x}, {self.y})")
             self.content = None
             self.cell_type = CellType.EMPTY
+        else:
+            print(f"⛔ Cell NOT cleared (protected type): ({self.x}, {self.y}) → {self.cell_type.name}")
 
     def __repr__(self):
         return f"Cell({self.x}, {self.y}): {self.cell_type.name}"

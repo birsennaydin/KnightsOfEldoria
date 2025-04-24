@@ -76,3 +76,10 @@ class Hideout:
             new_hunter = Hunter(new_name, new_skill, self.x, self.y)
             self.add_hunter(new_hunter, grid)  # Create new hunter with one of the existing diverse skills
             new_hunter.log(f"has been recruited with skill: {new_skill.name}")
+
+    def __str__(self):
+        """String representation of the hunter."""
+        return f"Hideout(capacity={self.capacity}, x={self.x}, y={self.y}, hunters={self.hunters}, knıghts_patrols={self.knight_patrols}, stored_treasure={self.stored_treasures})"
+
+    def __repr__(self):
+        return self.__str__()

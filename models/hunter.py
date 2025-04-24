@@ -22,7 +22,9 @@ class Hunter:
         self.in_hideout = None
 
     def move(self):
+        self.log(f"Before movement Stamina: {self.stamina}")
         self.stamina -= 0.02
+        self.log(f"After movement Stamina: {self.stamina}")
         if self.stamina <= 0:
             self.stamina = 0
             self.collapsing = True
@@ -41,7 +43,7 @@ class Hunter:
                 self.log(f"fully rested and left the hideout at ({self.x}, {self.y})")
 
     def is_resting_in_hideout(self):
-        self.log(f"is_resting_in_hideout ({self.in_hideout} , {self.stamina})")
+        self.log(f"is_resting_in_hideout ({self.in_hideout} , Stamina:{self.stamina})")
         return self.in_hideout is not None
 
     def wants_to_return(self):
@@ -68,19 +70,25 @@ class Hunter:
     def scan_and_remember(self, nearby_cells):
         # Scan nearby cells to remember treasure and hideout positions
         for cell in nearby_cells:
-            self.log(f"SCAN AND REMEMBER. {cell}")
+            self.log(f"SCAN AND REMEMBER. {cell}, CELL NAME: {cell.cell_type.name}, CONTENT: {cell.content}")
             if cell.cell_type.name == "TREASURE" and cell.content:
+                self.log(f"SCAN TREASURE. {cell.x},{cell.y}, knownTREASURE: {self.known_treasures}")
                 pos = (cell.x, cell.y)
                 if pos not in self.known_treasures:
                     self.known_treasures.append(pos)
+                    self.log(f"APPEND TREASURE {self.known_treasures}")
             elif cell.cell_type.name == "HIDEOUT" and cell.content:
+                self.log(f"SCAN HIDEOUT. {cell.x},{cell.y}, knownHIDEOUT: {self.known_hideouts}")
                 pos = (cell.x, cell.y)
                 if pos not in self.known_hideouts:
                     self.known_hideouts.append(pos)
+                    self.log(f"APPEND HIDEOUT {self.known_hideouts}")
             elif cell.cell_type.name == "KNIGHT" and cell.content:
+                self.log(f"SCAN KNIGHT. {cell.x},{cell.y}, known KNIGHT: {self.known_knights}")
                 pos = (cell.x, cell.y)
                 if pos not in self.known_knights:
                     self.known_knights.append(pos)
+                    self.log(f"APPEND KNIGHT {self.known_knights}")
 
     def collapse_check(self):
         # Increment collapse counter and check if hunter has fully collapsed
@@ -131,3 +139,24 @@ class Hunter:
                 self.carrying = None
                 self.log(f"dropped treasure at ({old_x}, {old_y}) and fled to ({new_x}, {new_y})")
                 return
+
+    def __str__(self):
+        """Multiline string representation of the hunter."""
+        return (
+            f"Hunter:\n"
+            f"  Name: {self.name}\n"
+            f"  Position: ({self.x}, {self.y})\n"
+            f"  Stamina: {self.stamina}\n"
+            f"  Carrying: {self.carrying}\n"
+            f"  Skill: {self.skill}\n"
+            f"  Alive: {self.alive}\n"
+            f"  Collapsed Counter: {self.collapse_counter}\n"
+            f"  Resting: {self.resting}\n"
+            f"  Collapsing: {self.collapsing}\n"
+            f"  Known Treasures: {self.known_treasures}\n"
+            f"  Known Hideouts: {self.known_hideouts}\n"
+            f"  Known Knights: {self.known_knights}\n"
+        )
+
+    def __repr__(self):
+        return self.__str__()
