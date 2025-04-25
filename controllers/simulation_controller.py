@@ -144,6 +144,8 @@ class SimulationController:
             for treasure in list(self.treasures):
                 treasure.decay()
                 if treasure.is_depleted():
+                    print("✅ TREASURE IS DEPLETED: ", treasure)
+                    print("✅ TREASURE LISTs: ", self.treasures)
                     self.grid.clear_cell(treasure.x, treasure.y)
                     self.treasures.remove(treasure)
                     print("✅ TREASURE REMOVE: ", self.treasures, treasure)

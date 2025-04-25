@@ -59,9 +59,11 @@ class HunterController:
                 # If the target cell is a hideout and has space, drop the treasure
                 if new_cell.cell_type == CellType.HIDEOUT:
                     hideout = new_cell.content
+                    hunter.log(f"✅ HIDEOUT HUNTERS COUNT({len(hideout.hunters)},{hideout.hunters})")
                     if hideout and len(hideout.hunters) < hideout.capacity:
+
                         hideout.stored_treasures.append(hunter.carrying)
-                        hunter.log(f"✅ Stored treasure in hideout at ({new_x}, {new_y})")
+                        hunter.log(f"✅ Stored treasure in hideout at ({new_x}, {new_y}), HUNTER CARRYING: {hunter.carrying}")
 
                         self.simulation_controller.remove_treasure_from_list(hunter.carrying)
                         hunter.carrying = None
