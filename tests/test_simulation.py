@@ -32,7 +32,7 @@ def test_remove_treasure_from_list(sim):
     assert treasure not in sim.treasures
 
 def test_remove_hunter_from_list(sim):
-    hunter = Hunter("TestHunter", HunterSkill.STRENGTH, 0, 0)
+    hunter = Hunter("TestHunter", HunterSkill.STEALTH, 0, 0)
     sim.hunters.append(hunter)
     sim.grid.place_hunter(hunter)
     sim.remove_hunter_from_list(hunter)

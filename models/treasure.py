@@ -18,7 +18,7 @@ class Treasure:
     def decay(self):
         """Reduce the value of the treasure over time."""
         print("✅ TREASURE TYPEdecay00: ", self.value)
-        self.value = max(0.0, self.value - 0.1)
+        self.value = max(0.0, self.value * (1 - 0.001))
         print("✅ TREASURE TYPEdecay11: ", self.value)
 
     def is_depleted(self):

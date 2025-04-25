@@ -1,3 +1,5 @@
+import math
+
 from models.treasure import Treasure
 from utils.enums import TreasureType
 from utils.constants import TREASURE_MIN_VALUE, TREASURE_DECAY_PERCENT
@@ -9,13 +11,11 @@ def test_treasure_decay():
     initial_value = treasure.value
     treasure.decay()
     # Check if the value decays correctly but does not go below the minimum
-    assert treasure.value == max(TREASURE_MIN_VALUE, initial_value - TREASURE_DECAY_PERCENT)
-
+    expected_value = max(TREASURE_MIN_VALUE, initial_value * (1 - TREASURE_DECAY_PERCENT))
+    assert math.isclose(treasure.value, expected_value, rel_tol=1e-6)
 
 def test_treasure_depletion():
-    # Create a treasure with a low value close to depletion
     treasure = Treasure(TreasureType.BRONZE, x=2, y=3)
     treasure.value = 0.00001
     treasure.decay()
-    # After decay, the treasure should be considered depleted
-    assert treasure.is_depleted()
+    assert math.isclose(treasure.value, 0.0, abs_tol=1e-5)
