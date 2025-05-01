@@ -93,8 +93,9 @@ class HunterController:
 
                         # Leave the old treasure at the current (old) position
                         old_cell = self.grid.get_cell(hunter.x, hunter.y)
-                        old_cell.clear()
-                        old_cell.set_content(hunter.carrying, CellType.TREASURE)
+                        if old_cell.cell_type != CellType.HIDEOUT and old_cell.cell_type != CellType.GARRISON:
+                            old_cell.clear()
+                            old_cell.set_transit_content(hunter.carrying, CellType.TREASURE)
 
                         # Assign the new treasure to the hunter
                         hunter.carrying = new_treasure
@@ -104,7 +105,7 @@ class HunterController:
 
                         # Move the hunter to the new position
                         hunter.x, hunter.y = new_x, new_y
-                        self.grid.get_cell(new_x, new_y).set_content(hunter, CellType.HUNTER)
+                        self.grid.get_cell(new_x, new_y).set_transit_content(hunter, CellType.HUNTER)
 
                     else:
                         hunter.log(
@@ -115,11 +116,11 @@ class HunterController:
                         old_cell.clear()
 
                         # Drop the lesser treasure at the old position
-                        old_cell.set_content(new_treasure, CellType.TREASURE)
+                        old_cell.set_transit_content(new_treasure, CellType.TREASURE)
 
                         self.grid.clear_cell(new_x, new_y)
                         hunter.x, hunter.y = new_x, new_y
-                        self.grid.get_cell(new_x, new_y).set_content(hunter, CellType.HUNTER)
+                        self.grid.get_cell(new_x, new_y).set_transit_content(hunter, CellType.HUNTER)
 
                     # Move and scan surroundings
                     hunter.move()
@@ -135,7 +136,7 @@ class HunterController:
                 old_cell.clear()
 
                 hunter.x, hunter.y = new_x, new_y
-                self.grid.get_cell(new_x, new_y).set_content(hunter, CellType.HUNTER)
+                self.grid.get_cell(new_x, new_y).set_transit_content(hunter, CellType.HUNTER)
 
                 hunter.move()  # Stamina -0.02
                 nearby = self.grid.get_cells_in_radius(hunter.x, hunter.y, 1)
@@ -193,7 +194,7 @@ class HunterController:
                     old_cell.clear()
 
                     hunter.x, hunter.y = new_x, new_y
-                    self.grid.get_cell(new_x, new_y).set_content(hunter, CellType.HUNTER)
+                    self.grid.get_cell(new_x, new_y).set_transit_content(hunter, CellType.HUNTER)
 
                     # Move and scan
                     hunter.move()
@@ -206,7 +207,7 @@ class HunterController:
                     old_cell.clear()
 
                     hunter.x, hunter.y = new_x, new_y
-                    self.grid.get_cell(new_x, new_y).set_content(hunter, CellType.HUNTER)
+                    self.grid.get_cell(new_x, new_y).set_transit_content(hunter, CellType.HUNTER)
 
                     hunter.move()
                     nearby = self.grid.get_cells_in_radius(hunter.x, hunter.y, 1)
@@ -245,7 +246,7 @@ class HunterController:
 
                 old_cell.clear()
                 hunter.x, hunter.y = new_x, new_y
-                self.grid.get_cell(new_x, new_y).set_content(hunter, CellType.HUNTER)
+                self.grid.get_cell(new_x, new_y).set_transit_content(hunter, CellType.HUNTER)
 
                 hunter.move()
                 hunter.log(f"📦 HUNTER AFTER MOVE ({hunter})")

@@ -34,21 +34,20 @@ class Gui(tk.Tk):
 
     def _draw_legend(self):
         for widget in self.legend_panel.winfo_children():
-            widget.destroy()  # Clear previous content
+            widget.destroy()
 
-        counts = self._count_cell_types()
+        counts = self._count_entities()
 
         for cell_type, color in self.color_map.items():
             color_box = tk.Label(self.legend_panel, bg=color, width=2, height=1, relief="solid")
             label = tk.Label(
                 self.legend_panel,
-                text=f"{cell_type.name.title()} ({counts[cell_type]})"
+                text=f"{cell_type.name.title()} ({counts.get(cell_type, 0)})"
             )
             color_box.pack(side=tk.LEFT, padx=5)
             label.pack(side=tk.LEFT, padx=5)
 
     def _draw_grid(self):
-        """Render the grid by drawing each cell with the corresponding color."""
         for widget in self.grid_frame.winfo_children():
             widget.destroy()
 
@@ -61,9 +60,8 @@ class Gui(tk.Tk):
                 canvas.grid(row=y, column=x)
 
     def render(self):
-        """Redraw the legend and grid, then update the window."""
-        self._draw_legend()  # Refresh the legend with updated counts
-        self._draw_grid()  # Refresh the grid itself
+        self._draw_legend()
+        self._draw_grid()
         self.update()
         self.update_idletasks()
 
@@ -77,24 +75,26 @@ class Gui(tk.Tk):
         """Check if the window has been closed."""
         return self.__closed
 
-    def _count_cell_types(self):
+    def _count_entities(self):
+        """Count entities based on simulation controller lists."""
+        hunters = len(self.sim_controller.hunters)
+        knights = len(self.sim_controller.knights)
+        hideouts = len(self.sim_controller.hideouts)
+        garrisons = len(self.sim_controller.garrisons)
+        treasures_on_grid = len(self.sim_controller.treasures)
+        treasures = treasures_on_grid
+
+        # Calculate empty cells
+        total_cells = self.grid_data.size * self.grid_data.size
+        non_empty_cells = hunters + knights + hideouts + garrisons + treasures
+        empty = total_cells - non_empty_cells
+
         counts = {
-            CellType.EMPTY: 0,
-            CellType.HUNTER: 0,
-            CellType.TREASURE: 0,
-            CellType.KNIGHT: 0,
-            CellType.HIDEOUT: 0,
-            CellType.GARRISON: 0
+            CellType.EMPTY: empty,
+            CellType.HUNTER: hunters,
+            CellType.KNIGHT: knights,
+            CellType.HIDEOUT: hideouts,
+            CellType.GARRISON: garrisons,
+            CellType.TREASURE: treasures,
         }
-
-        for y in range(self.grid_data.size):
-            for x in range(self.grid_data.size):
-                cell = self.grid_data.get_cell(x, y)
-                if cell:
-                    counts[cell.cell_type] += 1
-
-        # Add hidden treasures stored inside hideouts
-        hidden_treasure_count = sum(len(h.stored_treasures) for h in self.sim_controller.hideouts)
-        counts[CellType.TREASURE] += hidden_treasure_count
-
         return counts

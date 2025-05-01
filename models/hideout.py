@@ -34,7 +34,7 @@ class Hideout:
             for nx, ny in neighbors:
                 if grid.get_cell(nx, ny).is_empty():
                     hunter.x, hunter.y = nx, ny
-                    grid.get_cell(nx, ny).set_content(hunter, CellType.HUNTER)
+                    grid.get_cell(nx, ny).set_transit_content(hunter, CellType.HUNTER)
                     hunter.log(f"left hideout and moved to ({nx}, {ny})")
                     break
 

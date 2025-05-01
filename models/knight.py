@@ -48,12 +48,12 @@ class Knight:
             return
 
     def is_exhausted(self):
-        return self.energy <= 0.2
+        return round(self.energy, 2) <= 0.2
 
     def rest(self):
         """Resting at the garrison."""
         print(f"{self} - KNIGHT REST.")
-        self.energy += 0.1
+        self.energy = round(self.energy + 0.1, 2)
         if self.energy >= 1.0:
             self.energy = 1.0  # Energy should not exceed 100%
             self.resting = False
@@ -85,6 +85,13 @@ class Knight:
         """
         return self.energy <= 0.2
 
+    def check_stamina(self):
+
+        if self.is_exhausted():
+            if self.energy <= 0:
+                self.energy = 0
+            self.resting = True
+
     def choose_target(self, hunters):
         """
         Choose the closest hunter as the target.
@@ -98,11 +105,15 @@ class Knight:
 
         for h in hunters:
             path = astar(self.grid, (self.x, self.y), (h.x, h.y), role="knight")
+            self.log(f"Reachable target found with A* path: {path}")
             if path and len(path) < best_cost:
+                self.log(f"Reachable target found with A* path0: {len(path)}, {best_cost}")
                 best_target = h
                 best_cost = len(path)
 
+        self.log(f"Best Target: {best_target}")
         self.target = best_target
+
         if best_target:
             self.log(
                 f"Target selected: {best_target.name} at ({best_target.x}, {best_target.y}) with path length {best_cost}")
@@ -121,8 +132,10 @@ class Knight:
         self.y = y
 
         new_cell = self.grid.get_cell(x, y)
+        self.log(f"Knight new CELL: {new_cell}")
         if new_cell:
-            new_cell.set_content(self, CellType.KNIGHT)
+            self.log(f"Knight new there is: {new_cell}")
+            new_cell.set_transit_content(self, CellType.KNIGHT)
 
         self.log(f"{self.name} moved to ({self.x}, {self.y})")
 
@@ -133,11 +146,17 @@ class Knight:
         :param method: The action method (either 'detain' or 'challenge').
         """
         if method == "detain":
-            hunter.stamina -= 0.05
+            hunter.stamina = round(hunter.stamina - 0.05, 2)
+            if hunter.stamina < 0:
+                hunter.stamina = 0
+
             hunter.drop_treasure(self.grid, self.grid.simulation_controller)
             self.log(f"Detained {hunter.name}, reduced stamina and forced to drop treasure.")
         elif method == "challenge":
-            hunter.stamina -= 0.20
+            hunter.stamina = round(hunter.stamina - 0.20, 2)
+            if hunter.stamina < 0:
+                hunter.stamina = 0
+
             hunter.drop_treasure(self.grid, self.grid.simulation_controller)
             self.log(f"Challenged {hunter.name}, reduced stamina significantly and forced to drop treasure.")
         else:
@@ -145,7 +164,7 @@ class Knight:
 
     def __str__(self):
         """String representation of the treasure."""
-        return f"Knight(type={self.name}, x={self.x}, y={self.y}, energy={self.energy}, alive={self.alive}, memory={self.memory}, garrison={self.garrison})"
+        return f"Knight(type={self.name}, x={self.x}, y={self.y}, energy={self.energy}, alive={self.alive}, resting= {self.resting},memory={self.memory}, garrison={self.garrison})"
 
     def __repr__(self):
         return self.__str__()

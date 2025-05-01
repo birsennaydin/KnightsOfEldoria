@@ -36,11 +36,11 @@ class SimulationController:
     def remove_treasure_from_list(self, treasure):
         """Remove the treasure from the simulation."""
         print(f"✅ TREASURE REMOVED000: {treasure}")
-        print(f"✅ TREASURES LIST REMOVED000: {self.treasures}")
+        print(f"✅ TREASURES LIST REMOVED000: {len(self.treasures)}, {self.treasures}")
         if treasure in self.treasures:
             self.treasures.remove(treasure)
             print(f"✅ TREASURE REMOVED001: {treasure}")
-        print(f"✅ TREASURE AFTER LIST: {self.treasures}")
+        print(f"✅ TREASURE AFTER LIST: {len(self.treasures)}, {self.treasures}")
 
     def add_treasure_to_list(self, treasure):
         """Add the treasure back to the simulation list if it's not already present."""
@@ -61,12 +61,12 @@ class SimulationController:
         all_positions = [(x, y) for x in range(size) for y in range(size)]
         random.shuffle(all_positions)
 
-        num_empty = int(total_cells * 0.55)
-        num_treasure = int(total_cells * 0.15)
-        num_knight = int(total_cells * 0.12)
-        num_hunter = int(total_cells * 0.1)
+        num_empty = int(total_cells * 0.86)
+        num_treasure = int(total_cells * 0.02)
+        num_knight = int(total_cells * 0.01)
+        num_hunter = int(total_cells * 0.01)
         num_hideout = int(total_cells * 0.05)
-        num_garrison = int(total_cells * 0.03)
+        num_garrison = int(total_cells * 0.05)
 
         print(f"SIMULATION num_empty: {num_empty},"
               f"num_treasure: {num_treasure},"
@@ -126,7 +126,7 @@ class SimulationController:
             x, y = all_positions.pop()
             self.grid.get_cell(x, y).clear()
 
-    def run(self, steps=100):
+    def run(self, steps=300):
 
         for step in range(steps):
             if self.gui.is_closed():
@@ -160,7 +160,8 @@ class SimulationController:
                   f"CARRYING: {all(hunter.carrying is None for hunter in self.hunters) }, "
                   f"HIDEOUT STORED TREASURE: {all(len(h.stored_treasures) == 0 for h in self.hideouts)},"
                   f"HUNTERS:{self.hunters},"
-                  f"DEAD HUNTERS: {all(not h.alive for h in self.hunters)},")
+                  f"DEAD HUNTERS: {all(not h.alive for h in self.hunters)},"
+                  f"🎯 SIMULATION STEP: {step + 1}")
 
             # === Termination Condition ===
             no_active_treasure = (

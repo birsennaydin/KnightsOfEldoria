@@ -22,15 +22,15 @@ class Hunter:
         self.in_hideout = None
 
     def move(self):
-        self.log(f"Before movement Stamina: {self.stamina}")
-        self.stamina -= 0.02
-        self.log(f"After movement Stamina: {self.stamina}")
+        self.log(f"Before movement Stamina: {self.stamina:.2f}")
+        self.stamina = round(self.stamina - 0.02, 2)
+        self.log(f"After movement Stamina: {self.stamina:.2f}")
         if self.stamina <= 0:
             self.stamina = 0
             self.collapsing = True
 
     def rest(self, grid):
-        self.stamina = min(1.0, self.stamina + 0.01)
+        self.stamina = round(min(1.0, self.stamina + 0.01), 2)
 
         if self.stamina >= 1.0:
             self.stamina = 1.0
@@ -43,7 +43,7 @@ class Hunter:
                 self.log(f"fully rested and left the hideout at ({self.x}, {self.y})")
 
     def is_resting_in_hideout(self):
-        self.log(f"is_resting_in_hideout ({self.in_hideout} , Stamina:{self.stamina})")
+        self.log(f"is_resting_in_hideout ({self.in_hideout} , Stamina:{self.stamina:.2f})")
         return self.in_hideout is not None
 
     def wants_to_return(self):
@@ -106,6 +106,7 @@ class Hunter:
         Drops the treasure at the current location, then moves hunter to a random nearby empty cell.
         Also remembers the drop location for future retrieval.
         """
+        self.log(f"DROP TREASURE. hunter: {self}")
         if not self.carrying:
             return
 
@@ -121,11 +122,11 @@ class Hunter:
                 # Move hunter to new location
                 grid.clear_cell(self.x, self.y)
                 self.x, self.y = new_x, new_y
-                grid.get_cell(self.x, self.y).set_content(self, CellType.HUNTER)
+                grid.get_cell(self.x, self.y).set_transit_content(self, CellType.HUNTER)
 
                 # Drop treasure in old cell
                 treasure.x, treasure.y = old_x, old_y
-                grid.get_cell(old_x, old_y).set_content(treasure, CellType.TREASURE)
+                grid.get_cell(old_x, old_y).set_transit_content(treasure, CellType.TREASURE)
 
                 # Add treasure back to simulation list
                 if simulation_controller:
