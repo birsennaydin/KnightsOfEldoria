@@ -39,6 +39,7 @@ class HunterController:
         if hunter.stamina == 0 and not hunter.collapsing:
             hunter.collapsing = True
             hunter.log("has reached 0 stamina and is collapsing.")
+            hunter.analyze_emotion_and_log("I'm collapsing from exhaustion.")
 
         # If the hunter is collapsing, perform collapse check
         if hunter.collapsing:
@@ -64,6 +65,7 @@ class HunterController:
 
                         hideout.stored_treasures.append(hunter.carrying)
                         hunter.log(f"✅ Stored treasure in hideout at ({new_x}, {new_y}), HUNTER CARRYING: {hunter.carrying}")
+                        hunter.analyze_emotion_and_log("Resting in hideout to recover stamina.")
 
                         self.simulation_controller.remove_treasure_from_list(hunter.carrying)
                         hunter.carrying = None
@@ -241,7 +243,8 @@ class HunterController:
                 if new_cell.cell_type == CellType.TREASURE:
                     treasure = new_cell.content
                     hunter.carrying = treasure
-                    hunter.log(f"📦 Collected treasure at ({new_x}, {new_y}) worth {treasure.value}")
+                    hunter.log(f"Collected treasure at ({new_x}, {new_y}) worth {treasure.value}")
+                    hunter.analyze_emotion_and_log(f"Found treasure worth {new_cell.content.value}")
                     self.grid.clear_cell(new_x, new_y)
 
                 old_cell.clear()
@@ -249,17 +252,17 @@ class HunterController:
                 self.grid.get_cell(new_x, new_y).set_transit_content(hunter, CellType.HUNTER)
 
                 hunter.move()
-                hunter.log(f"📦 HUNTER AFTER MOVE ({hunter})")
+                hunter.log(f"HUNTER AFTER MOVE ({hunter})")
                 nearby = self.grid.get_cells_in_radius(hunter.x, hunter.y, 1)
                 hunter.scan_and_remember(nearby)
-                hunter.log(f"❓ HEREEEEHUNTER:{hunter}")
+                hunter.log(f"Scanning And Remember Result:{hunter}")
                 return
             else:
-                hunter.log("❓ No path to treasure — waiting and scanning.")
+                hunter.log("No path to treasure — waiting and scanning.")
                 hunter.move()
                 nearby = self.grid.get_cells_in_radius(hunter.x, hunter.y, 1)
                 hunter.scan_and_remember(nearby)
-                hunter.log(f"❓ HEREEEEHUNTER:{hunter}")
+                hunter.log(f"Scanning And Remember Result:{hunter}")
                 return
 
     def get_safe_path_to_treasure(self, hunter):

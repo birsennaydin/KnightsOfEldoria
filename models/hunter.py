@@ -2,6 +2,7 @@ import random
 
 from utils.enums import CellType
 from utils.logger import log
+from nlp.sentiment_analyzer import analyze_sentiment
 
 class Hunter:
     def __init__(self, name, skill, x, y):
@@ -139,7 +140,13 @@ class Hunter:
                 # Clear carried treasure
                 self.carrying = None
                 self.log(f"dropped treasure at ({old_x}, {old_y}) and fled to ({new_x}, {new_y})")
+                self.analyze_emotion_and_log("Dropped treasure due to knight interaction.")
                 return
+
+    def analyze_emotion_and_log(self, message: str):
+        sentiment_score = analyze_sentiment(message)
+        self.log(f"Sentiment analysis of '{message}' → polarity: {sentiment_score:.2f}")
+        return sentiment_score
 
     def __str__(self):
         """Multiline string representation of the hunter."""
