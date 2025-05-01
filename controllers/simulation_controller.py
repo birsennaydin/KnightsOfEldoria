@@ -61,12 +61,12 @@ class SimulationController:
         all_positions = [(x, y) for x in range(size) for y in range(size)]
         random.shuffle(all_positions)
 
-        num_empty = int(total_cells * 0.86)
-        num_treasure = int(total_cells * 0.02)
-        num_knight = int(total_cells * 0.01)
-        num_hunter = int(total_cells * 0.01)
-        num_hideout = int(total_cells * 0.05)
-        num_garrison = int(total_cells * 0.05)
+        num_empty = int(total_cells * 0.60)
+        num_treasure = int(total_cells * 0.04)
+        num_knight = int(total_cells * 0.04)
+        num_hunter = int(total_cells * 0.20)
+        num_hideout = int(total_cells * 0.10)
+        num_garrison = int(total_cells * 0.02)
 
         print(f"SIMULATION num_empty: {num_empty},"
               f"num_treasure: {num_treasure},"

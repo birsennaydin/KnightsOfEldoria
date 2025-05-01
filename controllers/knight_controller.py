@@ -157,7 +157,7 @@ class KnightController:
                     if is_safe:
                         return path
                 else:
-                    knight.log(f"❌ No path found to {knight.pos}.")
+                    knight.log(f"❌ No path found to {knight}.")
 
         # === 2. Check nearby (1-cell radius) for hunter ===
         neighbors = self.grid.get_knight_neighbors(knight.x, knight.y)
