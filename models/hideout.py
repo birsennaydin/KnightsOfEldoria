@@ -15,16 +15,14 @@ class Hideout:
         self.stored_treasures = []  # Store delivered treasures
 
     def add_hunter(self, hunter, grid):
-        hunter.log(f"entered hideout at ({self.x}, {self.y})")
-        # Add hunter to the hideout if there is available capacity
+        hunter.log(f"Entered hideout at ({self.x}, {self.y})")
         if len(self.hunters) < self.capacity:
             self.hunters.append(hunter)
             hunter.in_hideout = self
             grid.clear_cell(hunter.x, hunter.y)
-            hunter.log(f"entered hideout at There is capacity({self.capacity}, {len(self.hunters)})")
+            hunter.log(f"Hideout has capacity ({len(self.hunters)}/{self.capacity})")
 
     def remove_hunter(self, hunter, grid):
-        # Remove hunter from the hideout
         hunter.in_hideout = None
         if hunter in self.hunters:
             self.hunters.remove(hunter)
@@ -35,7 +33,7 @@ class Hideout:
                 if grid.get_cell(nx, ny).is_empty():
                     hunter.x, hunter.y = nx, ny
                     grid.get_cell(nx, ny).set_transit_content(hunter, CellType.HUNTER)
-                    hunter.log(f"left hideout and moved to ({nx}, {ny})")
+                    hunter.log(f"Left hideout and moved to ({nx}, {ny})")
                     break
 
     def share_knowledge(self):
@@ -52,7 +50,6 @@ class Hideout:
         for h in self.hunters:
             h.known_treasures = list(set(h.known_treasures) | all_treasures)
             h.known_hideouts = list(set(h.known_hideouts) | all_hideouts)
-            # Also share knight patrol information
             h.known_knight_patrols = self.knight_patrols
 
     def try_recruit(self, grid):
@@ -74,11 +71,10 @@ class Hideout:
             new_skill = random.choice(existing_skills)
             new_name = f"Recruit-{self.x}-{self.y}-{random.randint(100, 999)}"
             new_hunter = Hunter(new_name, new_skill, self.x, self.y)
-            self.add_hunter(new_hunter, grid)  # Create new hunter with one of the existing diverse skills
-            new_hunter.log(f"has been recruited with skill: {new_skill.name}")
+            self.add_hunter(new_hunter, grid)
+            new_hunter.log(f"Recruited with skill: {new_skill.name}")
 
     def __str__(self):
-        """String representation of the hunter."""
         return f"Hideout(capacity={self.capacity}, x={self.x}, y={self.y}, hunters={self.hunters}, knıghts_patrols={self.knight_patrols}, stored_treasure={self.stored_treasures})"
 
     def __repr__(self):

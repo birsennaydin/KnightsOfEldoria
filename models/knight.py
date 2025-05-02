@@ -29,8 +29,8 @@ class Knight:
         """
         if self.is_exhausted() and self.garrison:  # If knight is exhausted and has a garrison
             self.resting = True
-            self.garrison.add_knight(self)  # Add the knight to the garrison
-            self.rest()  # Start the resting process
+            self.garrison.add_knight(self)
+            self.rest()
             print(f"{self.name} is resting at the garrison.")
 
     def move(self):
@@ -55,7 +55,7 @@ class Knight:
         print(f"{self} - KNIGHT REST.")
         self.energy = round(self.energy + 0.1, 2)
         if self.energy >= 1.0:
-            self.energy = 1.0  # Energy should not exceed 100%
+            self.energy = 1.0
             self.resting = False
             print(f"{self} - KNIGHT ENERGY IS READY.")
             # When rest is complete, remove the knight from the garrison
@@ -74,7 +74,7 @@ class Knight:
             if cell:
                 self.log(f"Scanning cell ({cell.x}, {cell.y}) → {cell.cell_type.name} | content: {cell.content}")
             if cell and cell.cell_type == CellType.HUNTER and cell.content:
-                self.log(f"⚔️ FOUND HUNTER at ({cell.x}, {cell.y})")
+                self.log(f"Found hunter at ({cell.x}, {cell.y})")
                 hunters.append(cell.content)
         return hunters
 
@@ -86,7 +86,6 @@ class Knight:
         return self.energy <= 0.2
 
     def check_stamina(self):
-
         if self.is_exhausted():
             if self.energy <= 0:
                 self.energy = 0
@@ -105,20 +104,17 @@ class Knight:
 
         for h in hunters:
             path = astar(self.grid, (self.x, self.y), (h.x, h.y), role="knight")
-            self.log(f"Reachable target found with A* path: {path}")
+            self.log(f"Checking path to hunter: {path}")
             if path and len(path) < best_cost:
-                self.log(f"Reachable target found with A* path0: {len(path)}, {best_cost}")
+                self.log(f"New best target with path length {len(path)}")
                 best_target = h
                 best_cost = len(path)
 
-        self.log(f"Best Target: {best_target}")
         self.target = best_target
-
         if best_target:
-            self.log(
-                f"Target selected: {best_target.name} at ({best_target.x}, {best_target.y}) with path length {best_cost}")
+            self.log(f"Target selected: {best_target.name} at ({best_target.x}, {best_target.y})")
         else:
-            self.log("No reachable target found with A*")
+            self.log("No reachable target found.")
 
     def move_to(self, x, y):
         """
@@ -132,9 +128,7 @@ class Knight:
         self.y = y
 
         new_cell = self.grid.get_cell(x, y)
-        self.log(f"Knight new CELL: {new_cell}")
         if new_cell:
-            self.log(f"Knight new there is: {new_cell}")
             new_cell.set_transit_content(self, CellType.KNIGHT)
 
         self.log(f"{self.name} moved to ({self.x}, {self.y})")
@@ -149,22 +143,19 @@ class Knight:
             hunter.stamina = round(hunter.stamina - 0.05, 2)
             if hunter.stamina < 0:
                 hunter.stamina = 0
-
             hunter.drop_treasure(self.grid, self.grid.simulation_controller)
             self.log(f"Detained {hunter.name}, reduced stamina and forced to drop treasure.")
         elif method == "challenge":
             hunter.stamina = round(hunter.stamina - 0.20, 2)
             if hunter.stamina < 0:
                 hunter.stamina = 0
-
             hunter.drop_treasure(self.grid, self.grid.simulation_controller)
             self.log(f"Challenged {hunter.name}, reduced stamina significantly and forced to drop treasure.")
         else:
             self.log(f"Unknown interaction method: {method}")
 
     def __str__(self):
-        """String representation of the treasure."""
-        return f"Knight(type={self.name}, x={self.x}, y={self.y}, energy={self.energy}, alive={self.alive}, resting= {self.resting},memory={self.memory}, garrison={self.garrison})"
+        return f"Knight(type={self.name}, x={self.x}, y={self.y}, energy={self.energy}, alive={self.alive}, resting={self.resting}, memory={self.memory}, garrison={self.garrison})"
 
     def __repr__(self):
         return self.__str__()

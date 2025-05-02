@@ -17,9 +17,9 @@ class Treasure:
 
     def decay(self):
         """Reduce the value of the treasure over time (0.1% per step)."""
-        print("✅ TREASURE VALUE BEFORE DECAY:", self.value)
+        print("Treasure value before decay:", self.value)
         self.value -= self.value * 0.001
-        print("✅ TREASURE VALUE AFTER DECAY:", self.value)
+        print("Treasure value after decay:", self.value)
 
     def is_depleted(self):
         """Check if the treasure has no remaining value (or effectively none)."""
